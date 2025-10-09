@@ -117,9 +117,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### Live Demo
 🚀 **Production URL**: https://push-predict.vercel.app
-🔗 **Alternative URLs**: 
-- https://push-predict-cankats-projects.vercel.app
-- https://push-predict-gzhv3nl0o-cankats-projects.vercel.app
+
 
 ### Deploy to Vercel
 
