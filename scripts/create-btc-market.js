@@ -1,39 +1,40 @@
 const hre = require("hardhat");
+require("dotenv").config();
 
 async function main() {
-  console.log("🚀 Creating BTC $150K Market...");
+  console.log("🍩 Creating Bitcoin prediction market on PushPredict...");
 
-  const contractAddress = "0xa17952b425026191D79Fc3909B77C40854EBB4F0";
-  
-  // Get the contract instance
-  const PredictionMarket = await hre.ethers.getContractFactory("PredictionMarket");
-  const predictionMarket = await PredictionMarket.attach(contractAddress);
+  const contractAddress = process.env.CONTRACT_ADDRESS;
+  if (!contractAddress) {
+    console.error("❌ CONTRACT_ADDRESS not found in .env file");
+    process.exit(1);
+  }
+
+  // Get the contract
+  const PushPredict = await hre.ethers.getContractFactory("PushPredict");
+  const pushPredict = PushPredict.attach(contractAddress);
 
   // Market details
-  const title = "Will Bitcoin reach $150,000 by December 31, 2025?";
-  const description = "Bitcoin has been on a remarkable bull run in 2024-2025. This market predicts whether BTC will reach or exceed $150,000 USD by the end of December 2025. Resolution will be based on major exchange prices (Binance, Coinbase, Kraken average) at 23:59 UTC on December 31, 2025.";
-  const optionA = "Yes - BTC ≥ $150K";
-  const optionB = "No - BTC < $150K";
-  const category = 4; // Finance category
-  
-  // End time: December 31, 2025, 23:59 UTC
-  const endDate = new Date("2025-12-31T23:59:00Z");
-  const endTime = Math.floor(endDate.getTime() / 1000);
-  
-  const minBet = hre.ethers.utils.parseEther("0.1"); // 0.1 tCTC minimum
-  const maxBet = hre.ethers.utils.parseEther("50.0"); // 50 tCTC maximum
-  const imageUrl = "https://cryptologos.cc/logos/bitcoin-btc-logo.png";
+  const title = "Bitcoin Price Prediction - Will BTC reach $120,000 by March 2025?";
+  const description = "Predict whether Bitcoin (BTC) will reach or exceed $120,000 USD by March 31, 2025. This market uses reliable price feeds and supports cross-chain participation.";
+  const optionA = "Yes - BTC will reach $120,000";
+  const optionB = "No - BTC will stay below $120,000";
+  const category = 1; // Crypto category
+  const endTime = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60); // 90 days from now
+  const minBet = hre.ethers.utils.parseEther("0.01"); // 0.01 PC
+  const maxBet = hre.ethers.utils.parseEther("10"); // 10 PC
+  const imageUrl = "https://images.unsplash.com/photo-1518544866330-4e4815de2e10?w=500";
 
-  console.log("📋 Market Details:");
-  console.log("Title:", title);
-  console.log("End Date:", endDate.toISOString());
-  console.log("Min Bet:", hre.ethers.utils.formatEther(minBet), "tCTC");
-  console.log("Max Bet:", hre.ethers.utils.formatEther(maxBet), "tCTC");
-  
+  // Supported chains for this market
+  const supportedChains = [
+    "eip155:42101", // Push Testnet
+    "eip155:11155111", // Ethereum Sepolia
+    "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" // Solana Devnet
+  ];
+
   try {
-    console.log("📤 Creating market...");
-    
-    const tx = await predictionMarket.createMarket(
+    console.log("⏳ Creating universal market...");
+    const tx = await pushPredict.createUniversalMarket(
       title,
       description,
       optionA,
@@ -42,33 +43,37 @@ async function main() {
       endTime,
       minBet,
       maxBet,
-      imageUrl
+      imageUrl,
+      supportedChains
     );
 
+    console.log("📝 Transaction hash:", tx.hash);
     console.log("⏳ Waiting for confirmation...");
+    
     const receipt = await tx.wait();
     
-    console.log("✅ Market created successfully!");
-    console.log("📝 Transaction hash:", tx.hash);
-    console.log("⛽ Gas used:", receipt.gasUsed.toString());
+    // Find the MarketCreated event
+    const marketCreatedEvent = receipt.events?.find(
+      event => event.event === "MarketCreated"
+    );
     
-    // Get the market ID from events
-    const marketCreatedEvent = receipt.events?.find(e => e.event === 'MarketCreated');
     if (marketCreatedEvent) {
-      const marketId = marketCreatedEvent.args?.marketId;
-      console.log("🆔 Market ID:", marketId.toString());
-      console.log("🔗 View market at: http://localhost:3000/markets/" + marketId.toString());
+      const marketId = marketCreatedEvent.args.marketId.toString();
+      console.log("✅ Bitcoin market created successfully!");
+      console.log("📊 Market ID:", marketId);
+      console.log("🏷️ Title:", title);
+      console.log("⏰ End Time:", new Date(endTime * 1000).toLocaleString());
+      console.log("💰 Min Bet:", hre.ethers.utils.formatEther(minBet), "PC");
+      console.log("💰 Max Bet:", hre.ethers.utils.formatEther(maxBet), "PC");
+      console.log("🌐 Supported Chains:", supportedChains.length);
+      console.log(`🔗 View on explorer: https://donut.push.network/address/${contractAddress}`);
+    } else {
+      console.log("✅ Market created but event not found in receipt");
     }
 
   } catch (error) {
-    console.error("❌ Market creation failed:", error);
-    
-    if (error.message.includes("End time must be in the future")) {
-      console.log("💡 Tip: Make sure the end date is in the future");
-    }
-    if (error.message.includes("Ownable: caller is not the owner")) {
-      console.log("💡 Tip: Make sure you're using the owner wallet");
-    }
+    console.error("❌ Failed to create market:", error.message);
+    process.exit(1);
   }
 }
 

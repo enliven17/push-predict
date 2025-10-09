@@ -1,40 +1,40 @@
 const hre = require("hardhat");
+require("dotenv").config();
 
 async function main() {
-  console.log("🚀 Creating ETH $7K Market...");
+  console.log("🍩 Creating Ethereum prediction market on PushPredict...");
 
-  const contractAddress = "0xa17952b425026191D79Fc3909B77C40854EBB4F0";
-  
-  // Get the contract instance
-  const PredictionMarket = await hre.ethers.getContractFactory("PredictionMarket");
-  const predictionMarket = await PredictionMarket.attach(contractAddress);
+  const contractAddress = process.env.CONTRACT_ADDRESS;
+  if (!contractAddress) {
+    console.error("❌ CONTRACT_ADDRESS not found in .env file");
+    process.exit(1);
+  }
+
+  // Get the contract
+  const PushPredict = await hre.ethers.getContractFactory("PushPredict");
+  const pushPredict = PushPredict.attach(contractAddress);
 
   // Market details
-  const title = "Will Ethereum reach $7,000 by December 31, 2025?";
-  const description = "Ethereum has shown strong momentum throughout 2024-2025 with major upgrades and institutional adoption. This market predicts whether ETH will reach or exceed $7,000 USD by the end of December 2025. Resolution will be based on major exchange prices (Binance, Coinbase, Kraken average) at 23:59 UTC on December 31, 2025.";
-  const optionA = "Yes - ETH ≥ $7K";
-  const optionB = "No - ETH < $7K";
-  const category = 4; // Finance category
-  
-  // End time: December 31, 2025, 23:59 UTC
-  const endDate = new Date("2025-12-31T23:59:00Z");
-  const endTime = Math.floor(endDate.getTime() / 1000);
-  
-  const minBet = hre.ethers.utils.parseEther("0.05"); // 0.05 tCTC minimum
-  const maxBet = hre.ethers.utils.parseEther("25.0"); // 25 tCTC maximum
-  const imageUrl = "/ethereum.jpg";
+  const title = "Ethereum Price Prediction - Will ETH reach $8,000 by June 2025?";
+  const description = "Predict whether Ethereum (ETH) will reach or exceed $8,000 USD by June 30, 2025. This market leverages Push Network's universal features for seamless cross-chain participation.";
+  const optionA = "Yes - ETH will reach $8,000";
+  const optionB = "No - ETH will stay below $8,000";
+  const category = 1; // Crypto category
+  const endTime = Math.floor(Date.now() / 1000) + (180 * 24 * 60 * 60); // 180 days from now
+  const minBet = hre.ethers.utils.parseEther("0.005"); // 0.005 PC
+  const maxBet = hre.ethers.utils.parseEther("5"); // 5 PC
+  const imageUrl = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=500";
 
-  console.log("📋 Market Details:");
-  console.log("Title:", title);
-  console.log("End Date:", endDate.toISOString());
-  console.log("Min Bet:", hre.ethers.utils.formatEther(minBet), "tCTC");
-  console.log("Max Bet:", hre.ethers.utils.formatEther(maxBet), "tCTC");
-  console.log("Image:", imageUrl);
-  
+  // Supported chains for this market
+  const supportedChains = [
+    "eip155:42101", // Push Testnet
+    "eip155:11155111", // Ethereum Sepolia
+    "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" // Solana Devnet
+  ];
+
   try {
-    console.log("📤 Creating ETH market...");
-    
-    const tx = await predictionMarket.createMarket(
+    console.log("⏳ Creating universal market...");
+    const tx = await pushPredict.createUniversalMarket(
       title,
       description,
       optionA,
@@ -43,33 +43,37 @@ async function main() {
       endTime,
       minBet,
       maxBet,
-      imageUrl
+      imageUrl,
+      supportedChains
     );
 
+    console.log("📝 Transaction hash:", tx.hash);
     console.log("⏳ Waiting for confirmation...");
+    
     const receipt = await tx.wait();
     
-    console.log("✅ ETH Market created successfully!");
-    console.log("📝 Transaction hash:", tx.hash);
-    console.log("⛽ Gas used:", receipt.gasUsed.toString());
+    // Find the MarketCreated event
+    const marketCreatedEvent = receipt.events?.find(
+      event => event.event === "MarketCreated"
+    );
     
-    // Get the market ID from events
-    const marketCreatedEvent = receipt.events?.find(e => e.event === 'MarketCreated');
     if (marketCreatedEvent) {
-      const marketId = marketCreatedEvent.args?.marketId;
-      console.log("🆔 Market ID:", marketId.toString());
-      console.log("🔗 View market at: http://localhost:3000/markets/" + marketId.toString());
+      const marketId = marketCreatedEvent.args.marketId.toString();
+      console.log("✅ Ethereum market created successfully!");
+      console.log("📊 Market ID:", marketId);
+      console.log("🏷️ Title:", title);
+      console.log("⏰ End Time:", new Date(endTime * 1000).toLocaleString());
+      console.log("💰 Min Bet:", hre.ethers.utils.formatEther(minBet), "PC");
+      console.log("💰 Max Bet:", hre.ethers.utils.formatEther(maxBet), "PC");
+      console.log("🌐 Supported Chains:", supportedChains.length);
+      console.log(`🔗 View on explorer: https://donut.push.network/address/${contractAddress}`);
+    } else {
+      console.log("✅ Market created but event not found in receipt");
     }
 
   } catch (error) {
-    console.error("❌ ETH Market creation failed:", error);
-    
-    if (error.message.includes("End time must be in the future")) {
-      console.log("💡 Tip: Make sure the end date is in the future");
-    }
-    if (error.message.includes("Ownable: caller is not the owner")) {
-      console.log("💡 Tip: Make sure you're using the owner wallet");
-    }
+    console.error("❌ Failed to create market:", error.message);
+    process.exit(1);
   }
 }
 

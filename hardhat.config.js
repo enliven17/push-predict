@@ -4,7 +4,7 @@ require("dotenv").config();
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.22",
     settings: {
       optimizer: {
         enabled: true,
@@ -14,11 +14,27 @@ module.exports = {
     },
   },
   networks: {
-    creditcoin_testnet: {
-      url: "https://rpc.cc3-testnet.creditcoin.network",
-      chainId: 102031,
+    push_testnet: {
+      url: process.env.PUSH_RPC_URL || 'https://evm.rpc-testnet-donut-node1.push.org/',
+      chainId: 42101,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 20000000000, // 20 gwei
     },
+    push_testnet_alt: {
+      url: process.env.PUSH_RPC_URL_ALT || 'https://evm.rpc-testnet-donut-node2.push.org/',
+      chainId: 42101,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
+    // Keep Ethereum Sepolia for cross-chain testing
+    ethereum_sepolia: {
+      url: 'https://gateway.tenderly.co/public/sepolia',
+      chainId: 11155111,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
+  },
+  paths: {
+    sources: './contracts',
+    tests: './test',
+    cache: './cache',
+    artifacts: './artifacts',
   },
 };
