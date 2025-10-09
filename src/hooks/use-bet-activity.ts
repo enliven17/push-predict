@@ -55,7 +55,8 @@ export const useBetActivity = (marketId?: string) => {
       return data
     } catch (err: any) {
       console.error('Error adding bet activity:', err)
-      toast.error('Failed to record bet activity')
+      console.error('Activity data:', activity)
+      toast.error(`Failed to record bet activity: ${err.message || 'Unknown error'}`)
       throw err
     }
   }

@@ -14,16 +14,16 @@ async function main() {
   const PushPredict = await hre.ethers.getContractFactory("PushPredict");
   const pushPredict = PushPredict.attach(contractAddress);
 
-  // Market details
-  const title = "Ethereum Price Prediction - Will ETH reach $8,000 by June 2025?";
-  const description = "Predict whether Ethereum (ETH) will reach or exceed $8,000 USD by June 30, 2025. This market leverages Push Network's universal features for seamless cross-chain participation.";
-  const optionA = "Yes - ETH will reach $8,000";
-  const optionB = "No - ETH will stay below $8,000";
+  // Market details - Updated for December 2025
+  const title = "Ethereum Price Prediction - Will ETH reach $6,000 by December 31, 2025?";
+  const description = "Predict whether Ethereum (ETH) will reach or exceed $6,000 USD by December 31, 2025. This market leverages Push Network's universal features for seamless cross-chain participation from Ethereum, Solana, and Push Network.";
+  const optionA = "Yes - ETH will reach $6,000";
+  const optionB = "No - ETH will stay below $6,000";
   const category = 1; // Crypto category
-  const endTime = Math.floor(Date.now() / 1000) + (180 * 24 * 60 * 60); // 180 days from now
+  const endTime = Math.floor(new Date('2025-12-31T23:59:59Z').getTime() / 1000); // December 31, 2025
   const minBet = hre.ethers.utils.parseEther("0.005"); // 0.005 PC
   const maxBet = hre.ethers.utils.parseEther("5"); // 5 PC
-  const imageUrl = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=500";
+  const imageUrl = "/ethereum.jpg";
 
   // Supported chains for this market
   const supportedChains = [

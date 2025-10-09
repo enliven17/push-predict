@@ -14,16 +14,16 @@ async function main() {
   const PushPredict = await hre.ethers.getContractFactory("PushPredict");
   const pushPredict = PushPredict.attach(contractAddress);
 
-  // Market details
-  const title = "Bitcoin Price Prediction - Will BTC reach $120,000 by March 2025?";
-  const description = "Predict whether Bitcoin (BTC) will reach or exceed $120,000 USD by March 31, 2025. This market uses reliable price feeds and supports cross-chain participation.";
-  const optionA = "Yes - BTC will reach $120,000";
-  const optionB = "No - BTC will stay below $120,000";
+  // Market details - Updated for December 2025
+  const title = "Bitcoin Price Prediction - Will BTC reach $150,000 by December 31, 2025?";
+  const description = "Predict whether Bitcoin (BTC) will reach or exceed $150,000 USD by December 31, 2025. This market leverages Push Network's universal cross-chain technology for seamless participation from any supported blockchain.";
+  const optionA = "Yes - BTC will reach $150,000";
+  const optionB = "No - BTC will stay below $150,000";
   const category = 1; // Crypto category
-  const endTime = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60); // 90 days from now
+  const endTime = Math.floor(new Date('2025-12-31T23:59:59Z').getTime() / 1000); // December 31, 2025
   const minBet = hre.ethers.utils.parseEther("0.01"); // 0.01 PC
   const maxBet = hre.ethers.utils.parseEther("10"); // 10 PC
-  const imageUrl = "https://images.unsplash.com/photo-1518544866330-4e4815de2e10?w=500";
+  const imageUrl = "/bitcoin.png";
 
   // Supported chains for this market
   const supportedChains = [

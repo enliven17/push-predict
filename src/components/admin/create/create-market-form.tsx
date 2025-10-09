@@ -159,9 +159,9 @@ export function CreateMarketForm({ onSubmit, isLoading: externalLoading = false 
     const newErrors: Record<string, string> = {};
     const minBet = parseFloat(formData.minBet);
     const maxBet = parseFloat(formData.maxBet);
-    if (isNaN(minBet) || minBet < 0.01) newErrors.minBet = "Minimum bet must be at least 0.01 tCTC";
+    if (isNaN(minBet) || minBet < 0.01) newErrors.minBet = "Minimum bet must be at least 0.01 PC";
     if (isNaN(maxBet) || maxBet < minBet) newErrors.maxBet = "Maximum bet must be greater than minimum bet";
-    if (maxBet > 100000) newErrors.maxBet = "Maximum bet cannot exceed 100,000 tCTC";
+    if (maxBet > 100000) newErrors.maxBet = "Maximum bet cannot exceed 100,000 PC";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -435,7 +435,7 @@ export function CreateMarketForm({ onSubmit, isLoading: externalLoading = false 
           <CardContent className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="minBet" className="text-gray-300">Minimum Bet (tCTC) *</Label>
+                <Label htmlFor="minBet" className="text-gray-300">Minimum Bet (PC) *</Label>
                 <Input
                   id="minBet"
                   type="number"
@@ -449,7 +449,7 @@ export function CreateMarketForm({ onSubmit, isLoading: externalLoading = false 
                 {errors.minBet && <p className="text-sm text-red-400">{errors.minBet}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="maxBet" className="text-gray-300">Maximum Bet (tCTC) *</Label>
+                <Label htmlFor="maxBet" className="text-gray-300">Maximum Bet (PC) *</Label>
                 <Input
                   id="maxBet"
                   type="number"

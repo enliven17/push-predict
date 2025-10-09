@@ -12,7 +12,8 @@
     "deploy:push-alt": "hardhat run scripts/deploy.js --network push_testnet_alt",
     "verify:push": "hardhat verify --network push_testnet",
     "create:btc-market": "hardhat run scripts/create-btc-market.js --network push_testnet",
-    "create:eth-market": "hardhat run scripts/create-eth-market.js --network push_testnet"
+    "create:eth-market": "hardhat run scripts/create-eth-market.js --network push_testnet",
+    "resolve:market": "hardhat run scripts/resolve-market.js --network push_testnet"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

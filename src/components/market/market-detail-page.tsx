@@ -289,7 +289,7 @@ export default function MarketDetailPage() {
 
             <div className="flex items-center space-x-2">
               <DollarSign className="h-4 w-4 text-green-400" />
-              <span>{formatCurrency(market.totalPool)} tCTC volume</span>
+              <span>{formatCurrency(market.totalPool)} PC volume</span>
             </div>
           </div>
         </div>
@@ -358,7 +358,7 @@ export default function MarketDetailPage() {
                       </div>
                       <div className="text-center">
                         <div className="text-white font-bold text-lg">
-                          {formatCurrency(userPosition.totalInvested)} tCTC
+                          {formatCurrency(userPosition.totalInvested)} PC
                         </div>
                         <div className="text-gray-500 text-xs">Total invested</div>
                       </div>

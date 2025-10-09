@@ -2,7 +2,6 @@ const hre = require("hardhat");
 require("dotenv").config();
 
 async function main() {
-  // Hardhat passes arguments differently
   const marketId = "3"; // Market ID to resolve
   const outcome = "1"; // 0 for Yes (optionA), 1 for No (optionB)
 

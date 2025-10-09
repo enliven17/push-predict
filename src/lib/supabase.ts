@@ -8,12 +8,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Database types
 export interface BetActivity {
   id: string
-  market_id: string
+  market_id: number | string
   user_address: string
+  chain_namespace?: string
+  original_address?: string
   option: number
   amount: string
   shares: string
   tx_hash: string
+  block_number?: number
   created_at: string
   market_title?: string
   option_a?: string
