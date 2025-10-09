@@ -19,6 +19,26 @@ export const PREDICTION_MARKET_ABI = [
     "type": "function"
   },
   
+  // Universal Market Creation
+  {
+    "inputs": [
+      {"name": "_title", "type": "string"},
+      {"name": "_description", "type": "string"},
+      {"name": "_optionA", "type": "string"},
+      {"name": "_optionB", "type": "string"},
+      {"name": "_category", "type": "uint8"},
+      {"name": "_endTime", "type": "uint256"},
+      {"name": "_minBet", "type": "uint256"},
+      {"name": "_maxBet", "type": "uint256"},
+      {"name": "_imageUrl", "type": "string"},
+      {"name": "_supportedChains", "type": "string[]"}
+    ],
+    "name": "createUniversalMarket",
+    "outputs": [{"name": "", "type": "uint256"}],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  
   // Betting Functions
   {
     "inputs": [
@@ -26,6 +46,21 @@ export const PREDICTION_MARKET_ABI = [
       {"name": "_option", "type": "uint8"}
     ],
     "name": "placeBet",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  
+  // Cross-Chain Betting
+  {
+    "inputs": [
+      {"name": "_marketId", "type": "uint256"},
+      {"name": "_option", "type": "uint8"},
+      {"name": "originChain", "type": "string"},
+      {"name": "originAddress", "type": "address"},
+      {"name": "signature", "type": "bytes"}
+    ],
+    "name": "placeCrossChainBet",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"

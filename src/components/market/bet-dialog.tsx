@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { usePredictionContract, usePredictionContractRead } from '@/hooks/use-prediction-contract';
+import { useUniversalTransactions } from '@/hooks/use-universal-transactions';
 import { useBetActivity } from '@/hooks/use-bet-activity';
-import { useAccount, useBalance } from 'wagmi';
+import { useAccount, useBalance, useChainId, useWalletClient } from 'wagmi';
 import { useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
+import { ethers } from 'ethers';
 import { toast } from 'sonner';
-import { Loader2, TrendingUp, AlertCircle, CheckCircle, ExternalLink, Copy } from 'lucide-react';
+import { Loader2, TrendingUp, AlertCircle, CheckCircle, ExternalLink, Copy, Network } from 'lucide-react';
 
 interface BetDialogProps {
   open: boolean;
@@ -45,10 +47,28 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
+  const { data: walletClient } = useWalletClient();
+  const chainId = useChainId();
   const { placeBet, isLoading, isSuccess, hash } = usePredictionContract();
+  const { placeUniversalBet, isLoading: isUniversalLoading } = useUniversalTransactions();
   const { getMarket } = usePredictionContractRead();
   const { market } = getMarket(marketId);
   const { addBetActivity } = useBetActivity();
+
+  // Determine if we're on Push Network or need universal transaction
+  const isPushNetwork = chainId === 42101;
+  const chainInfo = getChainInfo(chainId);
+
+  function getChainInfo(id: number) {
+    switch (id) {
+      case 42101:
+        return { id: 42101, name: 'Push Network', currency: 'PC', icon: '🍩' };
+      case 11155111:
+        return { id: 11155111, name: 'Ethereum Sepolia', currency: 'ETH', icon: '⟠' };
+      default:
+        return { id, name: 'Unknown Network', currency: 'ETH', icon: '?' };
+    }
+  }
   
   // Wait for transaction confirmation
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -72,16 +92,13 @@ export const BetDialog: React.FC<BetDialogProps> = ({
       addBetActivity({
         market_id: parseInt(marketId),
         user_address: address,
-        chain_namespace: 'eip155:42101', // Push Network
-        original_address: address, // Same for native Push Network users
+        chain_namespace: isPushNetwork ? 'eip155:42101' : `eip155:${chainId}`,
+        original_address: address,
         option: optionIndex,
         amount: successData.amount,
         shares: successData.shares,
         tx_hash: hash,
-        block_number: null, // Will be filled later if needed
-        market_title: marketTitle,
-        option_a: optionA,
-        option_b: optionB
+        block_number: undefined // Will be filled later if needed
       }).catch(err => {
         console.error('Failed to record bet activity:', err);
         // Don't show error to user, it's not critical
@@ -109,12 +126,12 @@ export const BetDialog: React.FC<BetDialogProps> = ({
       const maxBetNum = parseFloat(market.maxBet);
       
       if (betAmountNum < minBetNum) {
-        toast.error(`Minimum bet amount is ${minBetNum} PC`);
+        toast.error(`Bet amount too low. Minimum: ${minBetNum} PC`);
         return;
       }
       
       if (betAmountNum > maxBetNum) {
-        toast.error(`Maximum bet amount is ${maxBetNum} PC`);
+        toast.error(`Bet amount too high. Maximum: ${maxBetNum} PC`);
         return;
       }
     }
@@ -124,16 +141,81 @@ export const BetDialog: React.FC<BetDialogProps> = ({
       console.log('🎯 Placing bet:', {
         marketId,
         option: optionIndex,
-        amount: betAmount
+        amount: betAmount,
+        chain: chainInfo.name,
+        isPushNetwork
       });
 
-      const result = await placeBet(marketId, optionIndex as 0 | 1, betAmount);
+      let result;
+      
+      if (isPushNetwork) {
+        // Native Push Network transaction
+        result = await placeBet(marketId, optionIndex as 0 | 1, betAmount);
+      } else {
+        // Universal cross-chain transaction
+        if (!walletClient) {
+          toast.error('Wallet client not available');
+          return;
+        }
+
+        const provider = new ethers.BrowserProvider(walletClient.transport);
+        const signer = await provider.getSigner();
+
+        result = await placeUniversalBet(signer, {
+          marketId,
+          option: optionIndex,
+          amount: betAmount,
+          originChain: `eip155:${chainId}`,
+          originAddress: address
+        });
+
+        // For universal bets, immediately record in Supabase since we have the result
+        if (result?.txHash) {
+          addBetActivity({
+            market_id: parseInt(marketId),
+            user_address: address,
+            chain_namespace: `eip155:${chainId}`,
+            original_address: address,
+            option: optionIndex,
+            amount: betAmount,
+            shares: betAmount,
+            tx_hash: result.txHash,
+            block_number: result.blockNumber || undefined
+          }).catch(async (err) => {
+            console.error('Failed to record universal bet activity:', err);
+            
+            // If foreign key error, try to sync markets first
+            if (err.message?.includes('foreign key constraint')) {
+              console.log('🔄 Foreign key error detected, syncing markets...');
+              try {
+                await fetch('/api/sync/markets', { method: 'POST' });
+                console.log('✅ Markets synced, retrying bet activity...');
+                
+                // Retry adding bet activity
+                await addBetActivity({
+                  market_id: parseInt(marketId),
+                  user_address: address,
+                  chain_namespace: `eip155:${chainId}`,
+                  original_address: address,
+                  option: optionIndex,
+                  amount: betAmount,
+                  shares: betAmount,
+                  tx_hash: result.txHash,
+                  block_number: result.blockNumber || undefined
+                });
+              } catch (retryErr) {
+                console.error('Failed to record bet activity after sync:', retryErr);
+              }
+            }
+          });
+        }
+      }
       
       // Store bet data for success modal (will show when transaction confirms)
       setSuccessData({
         amount: betAmount,
         option: selectedOption,
-        txHash: result || 'pending',
+        txHash: result?.txHash || result || 'pending',
         shares: betAmount // 1:1 ratio for now, could be calculated differently
       });
       
@@ -154,7 +236,8 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   };
 
   const isValidAmount = betAmount && parseFloat(betAmount) > 0;
-  const hasInsufficientBalance = balance && betAmount && parseEther(betAmount) > balance.value;
+  // Only check balance for Push Network (native payments)
+  const hasInsufficientBalance = isPushNetwork && balance && betAmount && parseEther(betAmount) > balance.value;
   
   // Min/Max validation
   const getBetValidation = () => {
@@ -167,14 +250,14 @@ export const BetDialog: React.FC<BetDialogProps> = ({
     if (betAmountNum < minBetNum) {
       return { 
         isValid: false, 
-        error: `Minimum bet: ${minBetNum} PC` 
+        error: `Bet amount too low (min: ${minBetNum} PC)` 
       };
     }
     
     if (betAmountNum > maxBetNum) {
       return { 
         isValid: false, 
-        error: `Maximum bet: ${maxBetNum} PC` 
+        error: `Bet amount too high (max: ${maxBetNum} PC)` 
       };
     }
     
@@ -187,9 +270,21 @@ export const BetDialog: React.FC<BetDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-gradient-to-br from-[#1A1F2C] to-[#151923] border-gray-800/50 text-white max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5 text-[#22c55e]" />
-            <span>Place Bet</span>
+          <DialogTitle className="text-xl font-bold flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5 text-[#22c55e]" />
+              <span>Place Bet</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">{chainInfo.icon}</span>
+              <Badge className={`text-xs ${
+                isPushNetwork 
+                  ? 'bg-pink-500/20 text-pink-400 border-pink-500/30' 
+                  : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+              }`}>
+                {chainInfo.name}
+              </Badge>
+            </div>
           </DialogTitle>
         </DialogHeader>
         
@@ -218,6 +313,14 @@ export const BetDialog: React.FC<BetDialogProps> = ({
               <Label htmlFor="betAmount" className="text-sm font-medium text-gray-300">
                 Bet Amount (PC)
               </Label>
+              {!isPushNetwork && (
+                <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20 mb-3">
+                  <div className="flex items-center space-x-2 text-blue-400 text-sm">
+                    <Network className="h-4 w-4" />
+                    <span>Universal Cross-Chain: Sign with your {chainInfo.name} wallet, bet executes on Push Network</span>
+                  </div>
+                </div>
+              )}
               <div className="relative">
                 <Input
                   id="betAmount"
@@ -240,9 +343,14 @@ export const BetDialog: React.FC<BetDialogProps> = ({
               
               {/* Balance Info */}
               <div className="flex justify-between text-xs text-gray-400">
-                <span>Available Balance:</span>
-                <span>{formatBalance(balance?.value)} PC</span>
+                <span>{isPushNetwork ? 'Available Balance:' : `${chainInfo.currency} Balance:`}</span>
+                <span>{formatBalance(balance?.value)} {chainInfo.currency}</span>
               </div>
+              {!isPushNetwork && (
+                <div className="text-xs text-gray-500 text-center">
+                  No {chainInfo.currency} payment required - signature only
+                </div>
+              )}
               
               {/* Min/Max Info */}
               {market && (
@@ -271,9 +379,16 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setBetAmount(balance ? formatBalance(balance.value) : '0')}
+                  onClick={() => {
+                    if (isPushNetwork) {
+                      setBetAmount(balance ? formatBalance(balance.value) : '0');
+                    } else {
+                      // For cross-chain, use market max bet (since no payment required)
+                      setBetAmount(market ? market.maxBet : '1.0');
+                    }
+                  }}
                   className="flex-1 bg-gray-800/30 border-gray-700 text-gray-300 hover:bg-gray-700/50 hover:text-white text-xs"
-                  disabled={isSubmitting || isLoading || !balance}
+                  disabled={isSubmitting || isLoading}
                 >
                   Max
                 </Button>
@@ -284,7 +399,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
             {hasInsufficientBalance && (
               <div className="flex items-center space-x-2 text-red-400 text-sm bg-red-500/10 rounded-lg p-3 border border-red-500/20">
                 <AlertCircle className="h-4 w-4" />
-                <span>Insufficient balance</span>
+                <span>Insufficient {chainInfo.currency} balance</span>
               </div>
             )}
             
@@ -336,13 +451,16 @@ export const BetDialog: React.FC<BetDialogProps> = ({
               <Button
                 type="submit"
                 className="flex-1 bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white shadow-lg"
-                disabled={!isValidAmount || hasInsufficientBalance || !betValidation.isValid || isSubmitting || isLoading || isConfirming || !address}
+                disabled={!isValidAmount || hasInsufficientBalance || !betValidation.isValid || isSubmitting || isLoading || isUniversalLoading || isConfirming || !address}
               >
-                {isSubmitting || isLoading || isConfirming ? (
+                {isSubmitting || isLoading || isUniversalLoading || isConfirming ? (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>
-                      {isSubmitting || isLoading ? 'Placing Bet...' : 'Confirming...'}
+                      {isSubmitting || isLoading || isUniversalLoading ? 
+                        (isPushNetwork ? 'Placing Bet...' : 'Processing Universal Bet...') : 
+                        'Confirming...'
+                      }
                     </span>
                   </div>
                 ) : (

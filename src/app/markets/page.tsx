@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePredictionContractRead } from "@/hooks/use-prediction-contract";
+import { useUniversalContractRead } from "@/hooks/use-universal-contract-read";
 import { Market } from "@/types/market";
 import {
   DollarSign,
@@ -22,8 +22,17 @@ export default function MarketsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("active");
 
-  // Use contract hooks for real data
-  const { activeMarkets, allMarkets, activeMarketsLoading, allMarketsLoading, refetchActiveMarkets, refetchAllMarkets } = usePredictionContractRead();
+  // Use universal contract hooks for cross-chain data
+  const { 
+    activeMarkets, 
+    allMarkets, 
+    activeMarketsLoading, 
+    allMarketsLoading, 
+    refetchActiveMarkets, 
+    refetchAllMarkets,
+    connectedChain,
+    isPushNetwork
+  } = useUniversalContractRead();
 
   const loading = activeMarketsLoading || allMarketsLoading;
   const error = null;
@@ -72,6 +81,16 @@ export default function MarketsPage() {
               <p className="text-gray-400 text-lg">
                 Universal cross-chain prediction markets powered by Push Network
               </p>
+              {!isPushNetwork && connectedChain && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <div className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">
+                    Cross-Chain Mode
+                  </div>
+                  <span className="text-gray-400">
+                    Connected to {connectedChain.name} • Markets from Push Network
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Create market button removed - admin only access */}

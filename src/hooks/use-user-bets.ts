@@ -18,17 +18,43 @@ export const useUserBets = (userAddress?: string) => {
             setIsLoading(true)
             setError(null)
 
-            const { data, error } = await supabase
+            // First try user_address
+            const { data: userBets, error: userError } = await supabase
                 .from('bet_activities')
                 .select('*')
                 .eq('user_address', userAddress)
-                .order('created_at', { ascending: false })
+                .order('created_at', { ascending: false });
+
+            if (userError) {
+                throw userError;
+            }
+
+            // Then try original_address
+            const { data: originalBets, error: originalError } = await supabase
+                .from('bet_activities')
+                .select('*')
+                .eq('original_address', userAddress)
+                .order('created_at', { ascending: false });
+
+            if (originalError) {
+                throw originalError;
+            }
+
+            // Combine and deduplicate
+            const allBets = [...(userBets || []), ...(originalBets || [])];
+            const uniqueBets = allBets.filter((bet, index, self) => 
+                index === self.findIndex(b => b.id === bet.id)
+            );
+
+            const data = uniqueBets.sort((a, b) => 
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
 
             if (error) {
                 throw error
             }
 
-            setUserBets(data || [])
+            setUserBets(data)
         } catch (err: any) {
             console.error('Error fetching user bets:', err)
             setError(err.message)
@@ -39,7 +65,17 @@ export const useUserBets = (userAddress?: string) => {
 
     // Get user bets for specific market
     const getUserBetsForMarket = (marketId: string) => {
-        return userBets.filter(bet => bet.market_id === marketId)
+        const numericMarketId = parseInt(marketId);
+        const filteredBets = userBets.filter(bet => {
+            const betMarketId = typeof bet.market_id === 'string' ? parseInt(bet.market_id) : bet.market_id;
+            return betMarketId === numericMarketId;
+        });
+        
+        console.log(`🔍 getUserBetsForMarket: marketId=${marketId}, numericMarketId=${numericMarketId}`);
+        console.log(`📊 Total user bets: ${userBets.length}, Filtered bets: ${filteredBets.length}`);
+        console.log('📝 User bets:', userBets.map(bet => ({ id: bet.id, market_id: bet.market_id, amount: bet.amount })));
+        
+        return filteredBets;
     }
 
     // Get user's total stats

@@ -1,5 +1,6 @@
 // Push Network Universal Client Configuration
 import { ethers } from 'ethers';
+// import { PushChain } from '@pushchain/core'; // Uncomment when available
 
 // Push Network Configuration
 export const PUSH_NETWORK_CONFIG = {

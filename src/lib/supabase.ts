@@ -18,9 +18,6 @@ export interface BetActivity {
   tx_hash: string
   block_number?: number
   created_at: string
-  market_title?: string
-  option_a?: string
-  option_b?: string
 }
 
 export interface Comment {

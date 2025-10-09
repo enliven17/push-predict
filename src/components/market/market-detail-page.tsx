@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePredictionContractRead, usePredictionContract } from "@/hooks/use-prediction-contract";
+import { useUniversalContractRead } from "@/hooks/use-universal-contract-read";
 import { OwnerOnly } from "@/components/auth/owner-only";
 import { useAccount } from "wagmi";
 import { MarketStatus } from "@/types/market";
@@ -40,8 +41,8 @@ export default function MarketDetailPage() {
   const marketId = params.id as string;
   const { address } = useAccount();
 
-  // Use contract hooks for real data
-  const { getMarket, getUserPosition } = usePredictionContractRead();
+  // Use universal contract hooks for cross-chain compatibility
+  const { getMarket, getUserPosition, isPushNetwork } = useUniversalContractRead();
   const { claimWinnings, resolveMarket } = usePredictionContract();
   const { market, isLoading: marketLoading, refetch: refetchMarket } = getMarket(marketId);
   const { position: userPosition, isLoading: positionLoading, refetch: refetchPosition } = getUserPosition(address || "", marketId);
@@ -206,6 +207,11 @@ export default function MarketDetailPage() {
                 <Badge className="bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]/30 font-medium">
                   Category {market.category}
                 </Badge>
+                {!isPushNetwork && (
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-medium">
+                    🌐 Universal Access
+                  </Badge>
+                )}
                 <Badge
                   variant={actualStatus === MarketStatus.Active ? "default" : "secondary"}
                   className={

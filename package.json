@@ -13,7 +13,10 @@
     "verify:push": "hardhat verify --network push_testnet",
     "create:btc-market": "hardhat run scripts/create-btc-market.js --network push_testnet",
     "create:eth-market": "hardhat run scripts/create-eth-market.js --network push_testnet",
-    "resolve:market": "hardhat run scripts/resolve-market.js --network push_testnet"
+    "resolve:market": "hardhat run scripts/resolve-market.js --network push_testnet",
+    "test:universal-bet": "hardhat run scripts/test-universal-bet.js --network push_testnet",
+    "test:real-universal": "hardhat run scripts/test-real-universal-bet.js --network push_testnet",
+    "test:push-universal": "node scripts/test-push-universal.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -101,7 +104,7 @@
     "chai": "^4.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "ethers": "^5.7.2",
+    "ethers": "^6.15.0",
     "hardhat": "^2.19.0",
     "hardhat-gas-reporter": "^2.3.0",
     "solidity-coverage": "^0.8.16",

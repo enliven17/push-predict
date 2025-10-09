@@ -3,7 +3,7 @@
 
 import { MarketCard } from "@/components/market/market-card";
 import { Button } from "@/components/ui/button";
-import { usePredictionContractRead } from "@/hooks/use-prediction-contract";
+import { useUniversalContractRead } from "@/hooks/use-universal-contract-read";
 import { ArrowRight, TrendingUp, BarChart3, Activity, Coins, Users } from "lucide-react";
 import { formatCompactCurrency } from "@/lib/constants";
 import Link from "next/link";
@@ -11,8 +11,15 @@ import React from "react";
 import CountUp from "react-countup";
 
 export default function HomePage() {
-    // Use contract hooks for real data
-    const { activeMarkets, allMarkets, activeMarketsLoading, allMarketsLoading } = usePredictionContractRead();
+    // Use universal contract hooks for cross-chain data
+    const { 
+        activeMarkets, 
+        allMarkets, 
+        activeMarketsLoading, 
+        allMarketsLoading,
+        connectedChain,
+        isPushNetwork
+    } = useUniversalContractRead();
     
     const marketsLoading = activeMarketsLoading || allMarketsLoading;
     const marketsError = null;
@@ -69,10 +76,20 @@ export default function HomePage() {
                         </h1>
                         
                         {/* Subheading */}
-                        <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
+                        <p className="text-lg md:text-xl text-gray-300 mb-6 max-w-2xl mx-auto">
                             Powered by Push Network's revolutionary universal features. 
                             <span className="text-pink-400"> Bet from any chain, win everywhere.</span>
                         </p>
+                        
+                        {!isPushNetwork && connectedChain && (
+                            <div className="mb-8 flex justify-center">
+                                <div className="px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-full">
+                                    <span className="text-yellow-400 text-sm font-medium">
+                                        🌐 Cross-Chain Mode: Connected to {connectedChain.name}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Subheading removed per request */}
 
