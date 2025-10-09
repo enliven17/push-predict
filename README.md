@@ -113,6 +113,60 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role_key>
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
+## 🌐 Deployment
+
+### Live Demo
+🚀 **Production URL**: https://push-predict.vercel.app
+🔗 **Alternative URLs**: 
+- https://push-predict-cankats-projects.vercel.app
+- https://push-predict-gzhv3nl0o-cankats-projects.vercel.app
+
+### Deploy to Vercel
+
+1. **Install Vercel CLI**
+```bash
+npm i -g vercel
+```
+
+2. **Login to Vercel**
+```bash
+vercel login
+```
+
+3. **Deploy the project**
+```bash
+vercel --prod
+```
+
+4. **Set environment variables in Vercel Dashboard**
+- Go to your project settings in Vercel
+- Add all environment variables from `.env.example`
+- Make sure to set production values
+
+5. **Redeploy after setting environment variables**
+```bash
+vercel --prod
+```
+
+### Environment Variables for Production
+
+Required environment variables for Vercel deployment:
+
+```bash
+# Public variables (safe to expose)
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x0fA9052a598799d8ef7061bd74915E92532E5DE9
+NEXT_PUBLIC_PUSH_RPC_URL=https://evm.rpc-testnet-donut-node1.push.org/
+NEXT_PUBLIC_PUSH_CHAIN_ID=42101
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+
+# Private variables (server-side only)
+PRIVATE_KEY=your_private_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+UNIVERSAL_SIGNER_PRIVATE_KEY=your_universal_signer_private_key
+```
+
 ## 📱 Universal Usage
 
 ### 🌐 For Cross-Chain Users
