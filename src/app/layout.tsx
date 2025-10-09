@@ -13,24 +13,24 @@ const bricolage = Bricolage_Grotesque({ subsets: ["latin"] });
 // Global Metadata
 export const metadata = {
   title: {
-    default: "Credit Predict – Decentralized Prediction Markets",
-    template: "%s | Credit Predict",
+    default: "PushPredict – Universal Cross-Chain Prediction Markets",
+    template: "%s | PushPredict",
   },
   description:
-    "Trade, predict, and win on Credit Predict. On-chain, transparent prediction markets on Creditcoin testnet.",
+    "Trade, predict, and win on PushPredict. Universal cross-chain prediction markets powered by Push Network's revolutionary technology.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   openGraph: {
-    title: "Credit Predict – Decentralized Prediction Markets",
+    title: "PushPredict – Universal Cross-Chain Prediction Markets",
     description:
-      "Trade, predict, and win on Credit Predict. On-chain, transparent, and community-driven.",
+      "Trade, predict, and win on PushPredict. Universal cross-chain, transparent, and community-driven prediction markets.",
     url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    siteName: "Credit Predict",
+    siteName: "PushPredict",
     images: [
       {
         url: "/favicon.ico",
         width: 1200,
         height: 630,
-        alt: "Credit Predict",
+        alt: "PushPredict",
       },
     ],
     locale: "en_US",
@@ -38,10 +38,10 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Credit Predict – Decentralized Prediction Markets",
+    title: "PushPredict – Universal Cross-Chain Prediction Markets",
     description:
-      "Trade, predict, and win on Credit Predict. On-chain, transparent, and community-driven.",
-    creator: "@creditpredict",
+      "Trade, predict, and win on PushPredict. Universal cross-chain, transparent, and community-driven.",
+    creator: "@pushpredict",
     images: [],
   },
   icons: undefined,
@@ -70,10 +70,12 @@ export default async function RootLayout({
       >
         <ErrorBoundary>
           <Web3Provider>
-            <div className="min-h-screen flex flex-col bg-gradient-to-r from-[#0A0C14] via-[#1A1F2C] to-[#0A0C14] text-white relative">
+            <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#0A0C14] via-[#1A1F2C] to-[#2D1B3D] text-white relative">
+              {/* Push Network gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-transparent to-purple-500/5 pointer-events-none" />
               <TermsGuard>
                 <Header />
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 relative z-10">{children}</main>
                 {pathname === "/" && <Footer />}
               </TermsGuard>
             </div>

@@ -40,7 +40,7 @@ const privacySections = [
     title: "How We Use Your Information",
     content: (
       <p className="text-gray-300 text-sm leading-relaxed">
-        We use your information to operate Credit Predict, process transactions, comply with laws, improve security and user experience, and communicate with you.
+        We use your information to operate PushPredict, process universal cross-chain transactions, comply with laws, improve security and user experience, and communicate with you.
       </p>
     ),
   },
@@ -49,7 +49,7 @@ const privacySections = [
     title: "Blockchain Transparency",
     content: (
       <p className="text-gray-300 text-sm leading-relaxed">
-        Wallet addresses and transactions are public and immutable on EVM-based blockchains. Credit Predict cannot alter or erase blockchain records.
+        Wallet addresses and transactions are public and immutable on Push Network and other supported blockchains (Ethereum, Solana). PushPredict cannot alter or erase blockchain records across any supported chain.
       </p>
     ),
   },
@@ -58,7 +58,7 @@ const privacySections = [
     title: "Regional Restrictions",
     content: (
       <p className="text-gray-300 text-sm leading-relaxed">
-        Credit Predict does not provide services to users in the United States of America (USA) or in jurisdictions where cryptocurrency or prediction platforms are restricted (e.g., China, North Korea).
+        PushPredict does not provide services to users in the United States of America (USA) or in jurisdictions where cryptocurrency, cross-chain protocols, or prediction platforms are restricted (e.g., China, North Korea).
       </p>
     ),
   },
@@ -112,7 +112,7 @@ const privacySections = [
     title: "Children's Privacy",
     content: (
       <p className="text-gray-300 text-sm leading-relaxed">
-        Credit Predict is not intended for users under 18 (or legal age in their jurisdiction). Data from minors will be deleted.
+        PushPredict is not intended for users under 18 (or legal age in their jurisdiction). Data from minors will be deleted.
       </p>
     ),
   },
@@ -136,12 +136,12 @@ const privacySections = [
         <ul className="list-none mt-2">
           <li>
             <Link
-              href="https://creditpredict.xyz"
+              href="https://pushpredict.xyz"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#22c55e] hover:text-[#16a34a] transition-colors duration-150"
+              className="text-[#e91e63] hover:text-[#ad1457] transition-colors duration-150"
             >
-              creditpredict.xyz
+              pushpredict.xyz
             </Link>
           </li>
         </ul>
@@ -164,7 +164,7 @@ const Page = () => {
   return (
     <div className="text-white min-h-screen flex flex-col mt-4">
       <header className="text-center">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Credit Predict Privacy Policies</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">PushPredict Privacy Policies</h1>
         <p className="text-gray-200 text-sm mt-2">Effective Date: October 7, 2025 | Last Updated: October 7, 2025</p>
       </header>
 
@@ -176,7 +176,7 @@ const Page = () => {
               <li key={section.id}>
                 <button
                   onClick={() => scrollToSection(index)}
-                  className="text-sm text-gray-400 hover:text-[#22c55e] transition-colors duration-150 w-full text-left py-1"
+                  className="text-sm text-gray-400 hover:text-[#e91e63] transition-colors duration-150 w-full text-left py-1"
                 >
                   {index + 1}. {section.title}
                 </button>

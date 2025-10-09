@@ -1,13 +1,13 @@
 ﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MarketCategory, MarketStatus } from "@/types/market";
 
-export function formatCurrency(value: string | number, currency = "tCTC"): string {
+export function formatCurrency(value: string | number, currency = "PC"): string {
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (Number.isNaN(num)) return `0.00 ${currency}`;
   return `${num.toFixed(2)} ${currency}`;
 }
 
-export function formatCompactCurrency(value: string | number, currency = "tCTC"): string {
+export function formatCompactCurrency(value: string | number, currency = "PC"): string {
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (Number.isNaN(num)) return `0 ${currency}`;
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M ${currency}`;

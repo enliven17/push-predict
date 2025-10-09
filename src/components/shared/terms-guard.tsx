@@ -83,12 +83,12 @@ export function TermsGuard({ children }: TermsGuardProps) {
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#22c55e] to-[#16a34a] blur-md opacity-70"></div>
           <div className="absolute inset-0 rounded-full bg-[#0A0C14]"></div>
           <div className="absolute inset-0 rounded-full border-2 border-transparent" style={{
-            backgroundImage: 'conic-gradient(from 0deg, #22c55e, #16a34a, #22c55e)',
+            backgroundImage: 'conic-gradient(from 0deg, #e91e63, #ad1457, #e91e63)',
             WebkitMask: 'radial-gradient(farthest-side, #0000 calc(100% - 4px), #000 0)'
           }} />
           <div className="absolute inset-0 animate-spin" style={{animationDuration: '1200ms'}}>
             <div className="absolute inset-0 rounded-full border-2 border-transparent" style={{
-              backgroundImage: 'conic-gradient(from 90deg, transparent 0%, #22c55e 30%, transparent 60%)',
+              backgroundImage: 'conic-gradient(from 90deg, transparent 0%, #e91e63 30%, transparent 60%)',
               WebkitMask: 'radial-gradient(farthest-side, #0000 calc(100% - 4px), #000 0)'
             }} />
           </div>

@@ -5,20 +5,22 @@ import { useEffect, useRef } from "react";
 const learnSections = [
   {
     id: "what-is-credit-predict",
-    title: "What Is Credit Predict",
+    title: "What Is PushPredict",
     content: (
       <p className="text-gray-300 text-sm leading-relaxed">
-        Credit Predict is a decentralized binary prediction platform built on the
-        Creditcoin testnet. Participants use tCTC tokens to express beliefs about
-        future events by staking on either a Yes or a No outcome. The
-        distribution of stakes across outcomes reflects the community's implied
+        PushPredict is a revolutionary universal cross-chain prediction platform built on 
+        Push Network's cutting-edge technology. Participants use PC tokens and other supported 
+        cryptocurrencies to express beliefs about future events by staking on either a Yes or 
+        a No outcome. The platform leverages Push Network's universal features to enable 
+        seamless cross-chain participation from Ethereum, Solana, and other supported blockchains.
+        The distribution of stakes across outcomes reflects the community's implied
         probability for each event.
       </p>
     ),
   },
   {
     id: "how-it-works",
-    title: "How Credit Predict Works",
+    title: "How PushPredict Works",
     content: (
       <ul className="list-none space-y-2 text-gray-300 text-sm leading-relaxed">
         <li>
@@ -26,16 +28,16 @@ const learnSections = [
           Each market resolves to either Yes or No.
         </li>
         <li>
-          <span className="font-semibold text-gray-100">Stake tCTC:</span>{" "}
-          Choose your side and stake tCTC tokens. Stakes are locked in a smart
-          contract until resolution.
+          <span className="font-semibold text-gray-100">Stake Universally:</span>{" "}
+          Choose your side and stake PC tokens or other supported cryptocurrencies from any 
+          connected chain. Stakes are locked in Push Network's universal smart contracts until resolution.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
-            Implied Probability:
+            Cross-Chain Consensus:
           </span>{" "}
-          The ratio of tCTC on each side indicates the market's current
-          consensus.
+          The ratio of stakes from all supported chains indicates the market's current
+          universal consensus across the entire ecosystem.
         </li>
         <li>
           <span className="font-semibold text-gray-100">Resolution:</span> When
@@ -52,34 +54,34 @@ const learnSections = [
   },
   {
     id: "why-use",
-    title: "Why Use Credit Predict",
+    title: "Why Use PushPredict",
     content: (
       <ul className="list-none space-y-2 text-gray-300 text-sm leading-relaxed">
         <li>
-          <span className="font-semibold text-gray-100">Powered by Creditcoin:</span>{" "}
-          Native utility for the Creditcoin ecosystem.
+          <span className="font-semibold text-gray-100">Powered by Push Network:</span>{" "}
+          Revolutionary universal cross-chain technology enabling seamless multi-blockchain interactions.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
-            Simple Binary Design:
+            Universal Access:
           </span>{" "}
-          No order books—just Yes or No.
+          Participate from any supported blockchain - Ethereum, Solana, Push Network, and more.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
-            Transparent and On-Chain:
+            Cross-Chain Transparency:
           </span>{" "}
-          Stakes, resolutions, and payouts are verifiable on the blockchain.
+          Stakes, resolutions, and payouts are verifiable across all supported blockchains.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
-            Collective Intelligence:
+            Global Collective Intelligence:
           </span>{" "}
-          Market prices often track real-world probabilities effectively.
+          Market consensus aggregated from participants across multiple blockchain ecosystems.
         </li>
         <li>
           <span className="font-semibold text-gray-100">No House Edge:</span>{" "}
-          Credit Predict is a neutral protocol; it is not your counterparty.
+          PushPredict is a neutral universal protocol; it is not your counterparty.
         </li>
       </ul>
     ),
@@ -103,30 +105,30 @@ const learnSections = [
     content: (
       <ul className="list-none space-y-2 text-gray-300 text-sm leading-relaxed">
         <li>
-          <span className="font-semibold text-gray-100">Risk:</span> If your
-          prediction is incorrect, you may lose your staked tCTC tokens. Only
-          stake what you can afford to lose.
+          <span className="font-semibold text-gray-100">Cross-Chain Risk:</span> If your
+          prediction is incorrect, you may lose your staked PC tokens or other cryptocurrencies. 
+          Cross-chain interactions may involve additional risks. Only stake what you can afford to lose.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
             Restricted Regions:
           </span>{" "}
-          Credit Predict is not available in the USA or jurisdictions that prohibit
-          or restrict cryptocurrency use.
+          PushPredict is not available in the USA or jurisdictions that prohibit
+          or restrict cryptocurrency, cross-chain protocols, or prediction market use.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
             No Financial Advice:
           </span>{" "}
-          Credit Predict provides an information and education platform; it does not
+          PushPredict provides an information and education platform; it does not
           provide investment or legal advice.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
-            On-Chain Transparency:
+            Universal Transparency:
           </span>{" "}
-          All activity is public, immutable, and auditable on the Creditcoin
-          blockchain.
+          All activity is public, immutable, and auditable across Push Network
+          and all supported blockchains.
         </li>
       </ul>
     ),
@@ -138,26 +140,27 @@ const learnSections = [
       <ul className="list-none space-y-2 text-gray-300 text-sm leading-relaxed">
         <li>
           <span className="font-semibold text-gray-100">
-            Create a Wallet:
+            Create Universal Wallet:
           </span>{" "}
-          Use a Creditcoin-compatible wallet and secure your
-          seed phrase.
+          Use a Push Network-compatible wallet (MetaMask for EVM chains, Phantom for Solana) 
+          and secure your seed phrase.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
-            Acquire tCTC Tokens:
+            Acquire PC Tokens:
           </span>{" "}
-          Buy tCTC via a testnet faucet or bridge and transfer them to your wallet.
+          Get PC tokens via Push Network testnet faucet or bridge from supported chains 
+          and transfer them to your wallet.
         </li>
         <li>
           <span className="font-semibold text-gray-100">
-            Connect to Credit Predict:
+            Connect to PushPredict:
           </span>{" "}
-          Visit the platform and link your wallet.
+          Visit the platform and link your universal wallet from any supported chain.
         </li>
         <li>
-          <span className="font-semibold text-gray-100">Explore Markets:</span>{" "}
-          Browse active markets, choose an outcome, and stake tCTC.
+          <span className="font-semibold text-gray-100">Explore Universal Markets:</span>{" "}
+          Browse cross-chain active markets, choose an outcome, and stake PC or other supported tokens.
         </li>
         <li>
           <span className="font-semibold text-gray-100">Track & Withdraw:</span>{" "}
@@ -204,10 +207,10 @@ const learnSections = [
     content: (
       <div className="space-y-4">
         <p className="text-gray-300 text-sm leading-relaxed">
-          Credit Predict distributes winnings using a proportional (pro-rata) model.
-          After deducting any platform or market-level fee, the remaining pool
+          PushPredict distributes winnings using a proportional (pro-rata) model across
+          all supported chains. After deducting any platform or market-level fee, the remaining pool
           is split among all participants on the correct outcome in proportion
-          to their stake.
+          to their stake, regardless of which blockchain they participated from.
         </p>
         <p className="text-gray-300 text-sm leading-relaxed">
           <span className="font-semibold text-gray-100">Formula:</span>
@@ -217,24 +220,24 @@ const learnSections = [
         <p className="text-gray-300 text-sm leading-relaxed">
           <span className="font-semibold text-gray-100">Worked Example:</span>
           <br />
-          Total Pool: 1,000 tCTC | Platform Fee: 2.5% (25 tCTC) | Remaining Pool:
-          975 tCTC
+          Total Pool: 1,000 PC | Platform Fee: 2.5% (25 PC) | Remaining Pool:
+          975 PC
           <br />
-          Outcome A (Winner): 400 tCTC | Outcome B (Loser): 600 tCTC
+          Outcome A (Winner): 400 PC | Outcome B (Loser): 600 PC
           <br />
-          Emma stakes 100 tCTC on Outcome A → Emma's share = 100 ÷ 400 = 25% →
-          Payout = 25% × 975 = 243.75 tCTC
+          Emma stakes 100 PC on Outcome A → Emma's share = 100 ÷ 400 = 25% →
+          Payout = 25% × 975 = 243.75 PC
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-gray-300 border-collapse">
             <thead>
               <tr className="bg-[#2a2c38] text-gray-100">
                 <th className="p-2 text-left">User</th>
-                <th className="p-2 text-left">Stake (tCTC)</th>
+                <th className="p-2 text-left">Stake (PC)</th>
                 <th className="p-2 text-left">Outcome Picked</th>
                 <th className="p-2 text-left">Result</th>
-                <th className="p-2 text-left">Payout (tCTC)</th>
-                <th className="p-2 text-left">Profit (tCTC)</th>
+                <th className="p-2 text-left">Payout (PC)</th>
+                <th className="p-2 text-left">Profit (PC)</th>
               </tr>
             </thead>
             <tbody>
@@ -298,7 +301,7 @@ const Page = () => {
       {/* Header */}
       <header className="text-center">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          Credit Predict Learn
+          PushPredict Learn
         </h1>
         <p className="text-gray-200 text-sm mt-2">
           Effective Date: October 7, 2025 | Last Updated: October 7, 2025
@@ -315,7 +318,7 @@ const Page = () => {
               <li key={section.id}>
                 <button
                   onClick={() => scrollToSection(index)}
-                  className="text-sm text-gray-400 hover:text-[#9b87f5] transition-colors duration-150 w-full text-left py-1"
+                  className="text-sm text-gray-400 hover:text-[#e91e63] transition-colors duration-150 w-full text-left py-1"
                 >
                   {index + 1}. {section.title}
                 </button>

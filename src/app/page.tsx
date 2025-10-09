@@ -62,11 +62,17 @@ export default function HomePage() {
                 <div className="relative z-10 h-full flex items-center justify-center px-4">
                     <div className="text-center max-w-4xl mx-auto">
                         {/* Main Heading */}
-                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-10">
-                            <span className="inline-block animate-pull-up" style={{ animationDelay: "0ms" }}>Predict.</span>{" "}
-                            <span className="inline-block animate-pull-up text-[#22c55e]" style={{ animationDelay: "120ms" }}>Win.</span>{" "}
-                            <span className="inline-block animate-pull-up" style={{ animationDelay: "240ms" }}>Repeat.</span>
+                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                            <span className="inline-block animate-pull-up" style={{ animationDelay: "0ms" }}>Universal.</span>{" "}
+                            <span className="inline-block animate-pull-up text-[#e91e63]" style={{ animationDelay: "120ms" }}>Cross-Chain.</span>{" "}
+                            <span className="inline-block animate-pull-up" style={{ animationDelay: "240ms" }}>Predictions.</span>
                         </h1>
+                        
+                        {/* Subheading */}
+                        <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
+                            Powered by Push Network's revolutionary universal features. 
+                            <span className="text-pink-400"> Bet from any chain, win everywhere.</span>
+                        </p>
 
                         {/* Subheading removed per request */}
 
@@ -76,27 +82,27 @@ export default function HomePage() {
                                 asChild
                                 size="lg"
                                 style={{
-                                    backgroundColor: "#22c55e",
+                                    backgroundColor: "#e91e63",
                                     color: "white",
                                     fontSize: "16px",
                                     height: "fit-content",
                                     padding: "12px 32px",
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = "#16a34a";
+                                    e.currentTarget.style.backgroundColor = "#ad1457";
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = "#22c55e";
+                                    e.currentTarget.style.backgroundColor = "#e91e63";
                                 }}
                             >
                                 <Link href="/markets">
-                                    Explore Markets
+                                    Explore Universal Markets
                                     <ArrowRight className="ml-2 h-5 w-5" />
                                 </Link>
                             </Button>
 
                             <button
-                                className="border border-[#22c55e] text-[#22c55e] hover:bg-[#22c55e] hover:text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 max-sm:w-[60%]"
+                                className="border border-[#e91e63] text-[#e91e63] hover:bg-[#e91e63] hover:text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 max-sm:w-[60%]"
                                 onClick={() =>
                                     window.scrollTo({
                                         top: window.innerHeight,
@@ -104,16 +110,17 @@ export default function HomePage() {
                                     })
                                 }
                             >
-                                <Link href={"/learn"}>Learn More</Link>
+                                <Link href={"/learn"}>Learn About Push</Link>
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Animated Background Elements */}
-                <div className="absolute top-10 left-10 w-20 h-20 bg-[#22c55e]/10 rounded-full blur-xl animate-pulse"></div>
-                <div className="absolute bottom-10 right-10 w-32 h-32 bg-[#16a34a]/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-                <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-[#22c55e]/5 rounded-full blur-lg animate-bounce delay-500"></div>
+                <div className="absolute top-10 left-10 w-20 h-20 bg-[#e91e63]/10 rounded-full blur-xl animate-pulse"></div>
+                <div className="absolute bottom-10 right-10 w-32 h-32 bg-[#ad1457]/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+                <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-[#e91e63]/5 rounded-full blur-lg animate-bounce delay-500"></div>
+                <div className="absolute top-1/3 right-1/3 w-12 h-12 bg-purple-500/5 rounded-full blur-lg animate-pulse delay-700"></div>
 
                 {/* Bottom Gradient Fade */}
                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0A0C14] to-transparent"></div>
@@ -124,59 +131,59 @@ export default function HomePage() {
                 <div className="container mx-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
                         {/* Total Markets */}
-                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#22c55e]/30 transition-colors">
+                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#e91e63]/30 transition-colors">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-2 rounded-lg bg-[#22c55e]/15">
-                                    <BarChart3 className="h-5 w-5 text-[#22c55e]" />
+                                <div className="p-2 rounded-lg bg-[#e91e63]/15">
+                                    <BarChart3 className="h-5 w-5 text-[#e91e63]" />
                                 </div>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/20">live</span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e91e63]/10 text-[#e91e63] border border-[#e91e63]/20">live</span>
                             </div>
                             <div className="text-3xl font-bold text-white">
                                 <CountUp end={platformStats.totalMarkets} />
                             </div>
-                            <div className="text-sm text-gray-400 mt-1">Total Markets</div>
+                            <div className="text-sm text-gray-400 mt-1">Universal Markets</div>
                         </div>
 
                         {/* Active Now */}
-                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#22c55e]/30 transition-colors">
+                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#e91e63]/30 transition-colors">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-2 rounded-lg bg-[#22c55e]/15">
-                                    <Activity className="h-5 w-5 text-[#22c55e]" />
+                                <div className="p-2 rounded-lg bg-[#e91e63]/15">
+                                    <Activity className="h-5 w-5 text-[#e91e63]" />
                                 </div>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/20">now</span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e91e63]/10 text-[#e91e63] border border-[#e91e63]/20">now</span>
                             </div>
                             <div className="text-3xl font-bold text-white">
                                 <CountUp end={platformStats.activeMarkets} />
                             </div>
-                            <div className="text-sm text-gray-400 mt-1">Active Now</div>
+                            <div className="text-sm text-gray-400 mt-1">Cross-Chain Active</div>
                         </div>
 
-                        {/* tCTC Volume */}
-                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#22c55e]/30 transition-colors">
+                        {/* PC Volume */}
+                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#e91e63]/30 transition-colors">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-2 rounded-lg bg-[#22c55e]/15">
-                                    <Coins className="h-5 w-5 text-[#22c55e]" />
+                                <div className="p-2 rounded-lg bg-[#e91e63]/15">
+                                    <Coins className="h-5 w-5 text-[#e91e63]" />
                                 </div>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/20">tCTC</span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e91e63]/10 text-[#e91e63] border border-[#e91e63]/20">PC</span>
                             </div>
-                            <div className="text-3xl font-bold text-[#22c55e]">
+                            <div className="text-3xl font-bold text-[#e91e63]">
                                 {formatCompactCurrency(platformStats.totalVolume)}
                             </div>
                             <div className="text-sm text-gray-400 mt-1">Total Volume</div>
                         </div>
 
-                        {/* Trades */}
-                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#22c55e]/30 transition-colors">
+                        {/* Universal Users */}
+                        <div className="bg-[#1A1F2C] rounded-xl p-6 shadow-lg border border-gray-800/60 hover:border-[#e91e63]/30 transition-colors">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-2 rounded-lg bg-[#22c55e]/15">
-                                    <Users className="h-5 w-5 text-[#22c55e]" />
+                                <div className="p-2 rounded-lg bg-[#e91e63]/15">
+                                    <Users className="h-5 w-5 text-[#e91e63]" />
                                 </div>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/20">all-time</span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e91e63]/10 text-[#e91e63] border border-[#e91e63]/20">universal</span>
                             </div>
                             <div className="text-3xl font-bold text-white">
                                 <CountUp end={platformStats.totalUsers} suffix="+" />
                             </div>
-                            <div className="text-sm text-gray-400 mt-1">Trades</div>
+                            <div className="text-sm text-gray-400 mt-1">Universal Users</div>
                         </div>
                     </div>
                 </div>
@@ -198,20 +205,20 @@ export default function HomePage() {
                             asChild
                             variant="outline"
                             style={{
-                                borderColor: "#22c55e",
-                                color: "#22c55e",
+                                borderColor: "#e91e63",
+                                color: "#e91e63",
                                 backgroundColor: "transparent",
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = "#22c55e";
+                                e.currentTarget.style.backgroundColor = "#e91e63";
                                 e.currentTarget.style.color = "white";
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor = "transparent";
-                                e.currentTarget.style.color = "#22c55e";
+                                e.currentTarget.style.color = "#e91e63";
                             }}
                         >
-                            <Link href="/markets">View All Markets</Link>
+                            <Link href="/markets">View All Universal Markets</Link>
                         </Button>
                     </div>
 

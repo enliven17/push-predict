@@ -70,7 +70,7 @@ export default function MarketsPage() {
                 Prediction Markets
               </h1>
               <p className="text-gray-400 text-lg">
-                Trade on the outcomes of real-world events with tCTC tokens
+                Universal cross-chain prediction markets powered by Push Network
               </p>
             </div>
 
@@ -81,8 +81,8 @@ export default function MarketsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-gradient-to-br from-[#1A1F2C] to-[#151923] rounded-xl p-6 border border-gray-800/50 shadow-xl backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#22c55e]/20 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-[#22c55e]" />
+                <div className="p-2 bg-[#e91e63]/20 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-[#e91e63]" />
                 </div>
                 <span className="text-sm font-medium text-gray-400">
                   Active Markets
@@ -96,15 +96,15 @@ export default function MarketsPage() {
 
             <div className="bg-gradient-to-br from-[#1A1F2C] to-[#151923] rounded-xl p-6 border border-gray-800/50 shadow-xl backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#22c55e]/20 rounded-lg">
-                  <DollarSign className="h-5 w-5 text-[#22c55e]" />
+                <div className="p-2 bg-[#e91e63]/20 rounded-lg">
+                  <DollarSign className="h-5 w-5 text-[#e91e63]" />
                 </div>
                 <span className="text-sm font-medium text-gray-400">
                   Total Volume
                 </span>
               </div>
               <p className="text-3xl font-bold text-white">
-                {markets.reduce((sum, m) => sum + parseFloat(m.totalPool || "0"), 0).toFixed(0)} tCTC
+                {markets.reduce((sum, m) => sum + parseFloat(m.totalPool || "0"), 0).toFixed(0)} PC
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 All-time trading volume
@@ -113,8 +113,8 @@ export default function MarketsPage() {
 
             <div className="bg-gradient-to-br from-[#1A1F2C] to-[#151923] rounded-xl p-6 border border-gray-800/50 shadow-xl backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#22c55e]/20 rounded-lg">
-                  <Users className="h-5 w-5 text-[#22c55e]" />
+                <div className="p-2 bg-[#e91e63]/20 rounded-lg">
+                  <Users className="h-5 w-5 text-[#e91e63]" />
                 </div>
                 <span className="text-sm font-medium text-gray-400">
                   Total Users
@@ -128,8 +128,8 @@ export default function MarketsPage() {
 
             <div className="bg-gradient-to-br from-[#1A1F2C] to-[#151923] rounded-xl p-6 border border-gray-800/50 shadow-xl backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#22c55e]/20 rounded-lg">
-                  <Timer className="h-5 w-5 text-[#22c55e]" />
+                <div className="p-2 bg-[#e91e63]/20 rounded-lg">
+                  <Timer className="h-5 w-5 text-[#e91e63]" />
                 </div>
                 <span className="text-sm font-medium text-gray-400">
                   Pending Resolution
@@ -150,7 +150,7 @@ export default function MarketsPage() {
                 placeholder="Search markets by title, description, or options..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 bg-[#1A1F2C] border-gray-700 text-white placeholder-gray-400 focus:border-[#22c55e] focus:ring-[#22c55e]/20"
+                className="pl-12 h-12 bg-[#1A1F2C] border-gray-700 text-white placeholder-gray-400 focus:border-[#e91e63] focus:ring-[#e91e63]/20"
               />
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function MarketsPage() {
           <TabsList className="w-full bg-[#1A1F2C] border border-gray-800/50 rounded-xl p-1 h-auto grid grid-cols-3">
             <TabsTrigger
               value="active"
-              className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
+              className="data-[state=active]:bg-[#e91e63] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
             >
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
@@ -177,7 +177,7 @@ export default function MarketsPage() {
 
             <TabsTrigger
               value="resolved"
-              className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
+              className="data-[state=active]:bg-[#e91e63] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
             >
               <div className="flex items-center gap-2">
                 <Timer className="h-4 w-4" />
@@ -193,7 +193,7 @@ export default function MarketsPage() {
 
             <TabsTrigger
               value="all"
-              className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
+              className="data-[state=active]:bg-[#e91e63] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
             >
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />

@@ -23,7 +23,7 @@ export const MarketActivity: React.FC<MarketActivityProps> = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-[#22c55e]" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#e91e63]" />
         <span className="ml-2 text-gray-400">Loading activity...</span>
       </div>
     );

@@ -540,10 +540,10 @@ export function CreateMarketForm({ onSubmit, isLoading: externalLoading = false 
         <Button variant="outline" onClick={handleBack} disabled={step === 1 || loading} className="border-gray-700 text-gray-300 hover:bg-[#1A1F2C] hover:text-white">Back</Button>
         <div className="space-x-2">
           {step < 4 ? (
-            <Button onClick={handleNext} disabled={loading} className="bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white">Next</Button>
+            <Button onClick={handleNext} disabled={loading} className="bg-gradient-to-r from-[#e91e63] to-[#ad1457] hover:from-[#ad1457] hover:to-[#880e4f] text-white">Next</Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={loading || !isConnected} className="bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white">
-              {loading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating Market...</>) : ("Create Market")}
+            <Button onClick={handleSubmit} disabled={loading || !isConnected} className="bg-gradient-to-r from-[#e91e63] to-[#ad1457] hover:from-[#ad1457] hover:to-[#880e4f] text-white">
+              {loading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating Universal Market...</>) : ("Create Universal Market")}
             </Button>
           )}
         </div>

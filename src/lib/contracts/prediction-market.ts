@@ -210,5 +210,5 @@ export const PREDICTION_MARKET_ABI = [
   }
 ] as const;
 
-export const PREDICTION_MARKET_ADDRESS = process.env.NEXT_PUBLIC_CREDITPREDICT_CONTRACT as `0x${string}`;
+export const PREDICTION_MARKET_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
 export const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS as `0x${string}`;
