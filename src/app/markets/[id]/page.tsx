@@ -13,19 +13,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/markets/${marketId}`;
 
   return {
-    title: `Market ${marketId} | Credit Predict`,
-    description: 'View and trade on this prediction market',
+    title: `Market ${marketId}`,
+    description: 'View and trade on this universal cross-chain prediction market powered by Push Network',
     openGraph: {
-      title: `Market ${marketId} | Credit Predict`,
-      description: 'View and trade on this prediction market',
+      title: `Market ${marketId} | PushPredict`,
+      description: 'View and trade on this universal cross-chain prediction market powered by Push Network',
       url: canonicalUrl,
-      siteName: 'Credit Predict',
+      siteName: 'PushPredict',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Market ${marketId} | Credit Predict`,
-      description: 'View and trade on this prediction market',
+      title: `Market ${marketId} | PushPredict`,
+      description: 'View and trade on this universal cross-chain prediction market powered by Push Network',
     },
     alternates: {
       canonical: canonicalUrl,
