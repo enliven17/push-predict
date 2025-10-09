@@ -145,3 +145,99 @@
   background-size: 200% 200%;
   animation: gradient-shift 8s ease-in-out infinite;
 }
+/* Custom Scrollbar Styles for Better UX */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.5);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.7);
+}
+
+/* Modern Gradient Scrollbar */
+.scrollbar-gradient {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 197, 94, 0.6) rgba(26, 31, 44, 0.3);
+}
+
+.scrollbar-gradient::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-gradient::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgba(26, 31, 44, 0.3) 0%, rgba(21, 25, 35, 0.4) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(75, 85, 99, 0.1);
+}
+
+.scrollbar-gradient::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.8) 0%, rgba(22, 163, 74, 0.9) 50%, rgba(21, 128, 61, 0.8) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.1);
+}
+
+.scrollbar-gradient::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 1) 0%, rgba(22, 163, 74, 1) 50%, rgba(21, 128, 61, 0.9) 100%);
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
+  transform: scale(1.1);
+}
+
+.scrollbar-gradient::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(21, 128, 61, 1) 0%, rgba(22, 163, 74, 1) 50%, rgba(34, 197, 94, 1) 100%);
+}
+
+/* Subtle Scrollbar for Cards */
+.scrollbar-card {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(75, 85, 99, 0.4) transparent;
+}
+
+.scrollbar-card::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-card::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.4);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.scrollbar-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.6);
+}
+
+/* Hide scrollbar for Firefox */
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar for WebKit browsers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}

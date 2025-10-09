@@ -180,7 +180,7 @@ export default function MarketDetailPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen scrollbar-gradient">
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Market Header */}
         <div className="bg-gradient-to-br from-[#1A1F2C] via-[#151923] to-[#0A0C14] rounded-2xl border border-gray-800/50 p-8 shadow-2xl">
@@ -500,31 +500,37 @@ export default function MarketDetailPage() {
                 </TabsList>
 
                 {/* Bets Tab Content */}
-                <TabsContent value="bets" className="mt-4">
-                  <MarketActivity
-                    marketId={market.id}
-                    marketTitle={market.title}
-                    optionA={market.optionA}
-                    optionB={market.optionB}
-                  />
+                <TabsContent value="bets" className="mt-4 scrollbar-card">
+                  <div className="max-h-[600px] overflow-y-auto scrollbar-card">
+                    <MarketActivity
+                      marketId={market.id}
+                      marketTitle={market.title}
+                      optionA={market.optionA}
+                      optionB={market.optionB}
+                    />
+                  </div>
                 </TabsContent>
 
                 {/* My Bets Tab Content */}
-                <TabsContent value="my-bets" className="mt-4">
-                  <MyBets
-                    marketId={market.id}
-                    userAddress={address || ""}
-                    showAllBets={false}
-                  />
+                <TabsContent value="my-bets" className="mt-4 scrollbar-card">
+                  <div className="max-h-[600px] overflow-y-auto scrollbar-card">
+                    <MyBets
+                      marketId={market.id}
+                      userAddress={address || ""}
+                      showAllBets={false}
+                    />
+                  </div>
                 </TabsContent>
 
                 {/* Comments Tab Content */}
-                <TabsContent value="comments" className="mt-4">
-                  <CommentsSection
-                    marketId={parseInt(market.id)}
-                    marketTitle={market.title}
-                    currentUserAddress={address || ""}
-                  />
+                <TabsContent value="comments" className="mt-4 scrollbar-card">
+                  <div className="max-h-[600px] overflow-y-auto scrollbar-card">
+                    <CommentsSection
+                      marketId={parseInt(market.id)}
+                      marketTitle={market.title}
+                      currentUserAddress={address || ""}
+                    />
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>

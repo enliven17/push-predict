@@ -153,11 +153,18 @@ export const useUniversalContractRead = () => {
         let pushAddress = userAddress;
         
         if (chain.id !== 42101) {
-          // For cross-chain bets, positions are stored under universal signer address
-          // This should match the UNIVERSAL_SIGNER_PRIVATE_KEY from API
-          const universalSignerKey = process.env.NEXT_PUBLIC_UNIVERSAL_SIGNER_ADDRESS || 
-                                   '0x15848678881a1FF7b823419E04245F45D09AFbe3'; // Fallback
-          pushAddress = universalSignerKey;
+          // For cross-chain bets, we need to check both:
+          // 1. Main account address (where bets are actually stored)
+          // 2. User's cross-chain mapping (for future implementation)
+          
+          // For now, use main account address since all cross-chain bets go there
+          const mainAccountAddress = process.env.NEXT_PUBLIC_ETH_BRIDGE_ADDRESS || 
+                                   '0x71197e7a1CA5A2cb2AD82432B924F69B1E3dB123';
+          pushAddress = mainAccountAddress;
+          
+          // TODO: Implement proper cross-chain position mapping
+          // This is a limitation - all cross-chain users see the same position
+          console.log('⚠️ Cross-chain position: showing aggregated position from main account');
         }
 
         const data = await PUSH_CONTRACT.getUserPosition(pushAddress, marketId);

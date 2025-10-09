@@ -1,332 +1,345 @@
-# Credit Predict - System Architecture Diagrams
+# PushPredict Architecture Diagrams
 
-This document contains Mermaid diagrams illustrating the system architecture, user flows, and data relationships in Credit Predict.
+This document contains Mermaid diagrams that visualize the architecture and flows of the PushPredict universal cross-chain prediction market platform.
 
-## 🏗️ System Architecture
+## 1. System Architecture Overview
 
 ```mermaid
 graph TB
     subgraph "Frontend (Next.js)"
         UI[User Interface]
-        Hooks[React Hooks]
-        Store[Zustand Store]
-        Components[UI Components]
+        WC[Wallet Connectors]
+        UH[Universal Hooks]
     end
     
-    subgraph "Blockchain Layer"
-        Contract[PredictionMarket Contract]
-        Wallet[Web3 Wallet]
-        CTC[Creditcoin Testnet]
+    subgraph "Backend APIs"
+        API[Next.js API Routes]
+        SB[Supabase Database]
     end
     
-    subgraph "Database Layer"
-        Supabase[(Supabase PostgreSQL)]
-        BetActivities[Bet Activities Table]
-        Comments[Comments Table]
+    subgraph "Push Network"
+        PC[PredictionMarket Contract]
+        PN[Push Network Donut Testnet]
     end
     
-    subgraph "External Services"
-        WalletConnect[WalletConnect]
-        Explorer[Creditcoin Explorer]
-        RPC[Creditcoin RPC]
+    subgraph "Ethereum Sepolia"
+        EB[ETH Bridge Contract]
+        ES[Ethereum Sepolia Network]
     end
     
-    UI --> Hooks
-    Hooks --> Store
-    Hooks --> Contract
-    Contract --> CTC
-    Wallet --> WalletConnect
-    Contract --> RPC
-    Hooks --> Supabase
-    Supabase --> BetActivities
-    Supabase --> Comments
-    UI --> Explorer
+    subgraph "Solana Devnet"
+        SD[Solana Devnet]
+        SW[Solana Wallet]
+    end
+    
+    UI --> WC
+    WC --> UH
+    UH --> API
+    API --> SB
+    API --> PC
+    PC --> PN
+    
+    UH --> EB
+    EB --> ES
+    
+    UH --> SD
+    SD --> SW
+    
+    PC --> SB
+    EB --> PC
 ```
 
-## 🔄 User Betting Flow
+## 2. Universal Cross-Chain Betting Flow
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Frontend
-    participant Wallet
-    participant Contract
-    participant Supabase
-    participant Explorer
+    participant U as User
+    participant F as Frontend
+    participant W as Wallet
+    participant B as ETH Bridge
+    participant P as Push Contract
+    participant S as Supabase
     
-    User->>Frontend: Browse Markets
-    Frontend->>Contract: Fetch Market Data
-    Contract-->>Frontend: Market Information
+    U->>F: Select market & bet option
+    F->>U: Show universal bet dialog
+    U->>F: Choose chain (ETH/SOL/Push)
     
-    User->>Frontend: Click "Place Bet"
-    Frontend->>Frontend: Validate Bet Amount
-    Frontend->>Wallet: Request Transaction
-    Wallet->>User: Sign Transaction
-    User-->>Wallet: Approve
+    alt Ethereum Sepolia
+        F->>W: Connect to Ethereum
+        U->>W: Approve ETH payment
+        W->>B: Send ETH to bridge
+        B->>P: Bridge ETH to PC tokens
+        P->>P: Execute bet with PC
+    else Solana Devnet
+        F->>W: Connect to Solana
+        U->>W: Sign cross-chain message
+        F->>P: Submit signature to Push
+        P->>P: Verify & execute sponsored bet
+    else Push Network
+        F->>W: Connect to Push
+        U->>W: Direct PC token payment
+        W->>P: Execute bet directly
+    end
     
-    Wallet->>Contract: Submit Bet Transaction
-    Contract->>Contract: Validate & Process Bet
-    Contract-->>Wallet: Transaction Hash
-    
-    Frontend->>Contract: Wait for Confirmation
-    Contract-->>Frontend: Transaction Confirmed
-    
-    Frontend->>Supabase: Record Bet Activity
-    Supabase-->>Frontend: Activity Saved
-    
-    Frontend->>Frontend: Show Success Modal
-    Frontend->>Explorer: Link to Transaction
+    P->>S: Sync bet activity
+    S->>F: Update UI with new bet
+    F->>U: Show success confirmation
 ```
 
-## 🎯 Market Lifecycle
+## 3. ETH Bridge Architecture
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Created: Admin creates market
-    Created --> Active: Market goes live
-    Active --> Active: Users place bets
-    Active --> Paused: Admin pauses (optional)
-    Paused --> Active: Admin resumes
-    Active --> Ended: End time reached
-    Ended --> Resolved: Admin resolves outcome
-    Resolved --> [*]: Users claim winnings
+graph LR
+    subgraph "Ethereum Sepolia"
+        U[User Wallet]
+        EB[ETH Bridge Contract]
+        ETH[ETH Payment]
+    end
     
-    note right of Active
-        Users can:
-        - Place bets
-        - View activity
-        - Comment
-    end note
+    subgraph "Push Network"
+        US[Universal Signer]
+        PC[PredictionMarket Contract]
+        PCT[PC Tokens]
+    end
     
-    note right of Resolved
-        Users can:
-        - Claim winnings
-        - View final results
-    end note
+    subgraph "Backend"
+        API[Bridge API]
+        DB[Database]
+    end
+    
+    U -->|1. Pay ETH| EB
+    EB -->|2. Emit Event| API
+    API -->|3. Verify Payment| DB
+    API -->|4. Trigger Bridge| US
+    US -->|5. Send PC Tokens| PC
+    PC -->|6. Execute Bet| PCT
 ```
 
-## 💰 Payout Calculation Flow
-
-```mermaid
-flowchart TD
-    Start([Market Resolved]) --> GetPool[Get Total Pool]
-    GetPool --> CalcFee[Calculate Platform Fee<br/>2.5% of total pool]
-    CalcFee --> GetWinners[Get Winning Side Total]
-    GetWinners --> CalcReward[Reward Pool = Total - Fee]
-    
-    CalcReward --> ForEach{For Each Winner}
-    ForEach --> CalcShare[User Share = User Bet / Total Winning Bets]
-    CalcShare --> CalcPayout[User Payout = Share × Reward Pool]
-    CalcPayout --> SendPayout[Send Payout to User]
-    SendPayout --> ForEach
-    
-    ForEach --> End([All Payouts Complete])
-    
-    style CalcFee fill:#ff9999
-    style CalcPayout fill:#99ff99
-    style SendPayout fill:#9999ff
-```
-
-## 🗄️ Database Schema
+## 4. Database Schema Relationships
 
 ```mermaid
 erDiagram
+    MARKETS {
+        string id PK
+        string title
+        string description
+        string creator
+        timestamp created_at
+        timestamp end_time
+        int status
+        string option_a
+        string option_b
+    }
+    
     BET_ACTIVITIES {
-        uuid id PK
-        text market_id
-        text user_address
-        integer option
-        text amount
-        text shares
-        text tx_hash UK
-        text market_title
-        text option_a
-        text option_b
+        string id PK
+        string market_id FK
+        string user_address
+        decimal amount
+        decimal shares
+        int option
+        string tx_hash
         timestamp created_at
     }
     
     COMMENTS {
-        uuid id PK
-        text market_id
-        text user_address
+        string id PK
+        int market_id FK
+        string user_address
         text content
         timestamp created_at
-        timestamp updated_at
     }
     
-    BET_ACTIVITIES ||--o{ COMMENTS : "market_id"
+    BRIDGE_TRANSACTIONS {
+        string id PK
+        string eth_tx_hash
+        string push_tx_hash
+        string user_address
+        decimal eth_amount
+        decimal pc_amount
+        string status
+        timestamp created_at
+    }
+    
+    MARKETS ||--o{ BET_ACTIVITIES : "has many"
+    MARKETS ||--o{ COMMENTS : "has many"
+    BET_ACTIVITIES }o--|| BRIDGE_TRANSACTIONS : "may have"
 ```
 
-## 🔐 Authentication & Authorization Flow
+## 5. Universal Wallet Connection Flow
 
 ```mermaid
 flowchart TD
-    User[User Visits Site] --> Region{Check Region}
-    Region -->|Restricted| Block[Show Restriction Modal]
-    Region -->|Allowed| Connect[Connect Wallet Button]
+    A[User Clicks Connect] --> B{Detect Available Wallets}
     
-    Connect --> Wallet{Wallet Connected?}
-    Wallet -->|No| WalletConnect[WalletConnect Modal]
-    WalletConnect --> Sign[Sign Connection]
-    Sign --> Verify[Verify Signature]
+    B --> C[MetaMask/Rainbow - Ethereum]
+    B --> D[Phantom/Solflare - Solana]
+    B --> E[Push Wallet - Push Network]
     
-    Wallet -->|Yes| CheckNetwork{Correct Network?}
-    CheckNetwork -->|No| Switch[Switch to Creditcoin]
-    CheckNetwork -->|Yes| Access[Full App Access]
+    C --> F[Connect to Ethereum Sepolia]
+    D --> G[Connect to Solana Devnet]
+    E --> H[Connect to Push Network]
     
-    Verify --> Access
-    Switch --> Access
+    F --> I[Check ETH Balance]
+    G --> J[Check SOL Balance]
+    H --> K[Check PC Balance]
     
-    Access --> Features[Available Features]
-    Features --> PlaceBets[Place Bets]
-    Features --> ViewHistory[View History]
-    Features --> Comment[Comment on Markets]
+    I --> L[Enable ETH Bridge Betting]
+    J --> M[Enable Cross-Chain Signing]
+    K --> N[Enable Direct PC Betting]
     
-    Block --> End[Access Denied]
-    
-    style Block fill:#ff9999
-    style Access fill:#99ff99
-    style Features fill:#9999ff
+    L --> O[Universal Interface Ready]
+    M --> O
+    N --> O
 ```
 
-## 📊 Component Architecture
-
-```mermaid
-graph TD
-    App[App Layout] --> Header[Header Component]
-    App --> Main[Main Content]
-    App --> Footer[Footer Component]
-    
-    Header --> WalletButton[Wallet Button]
-    Header --> Navigation[Navigation Links]
-    
-    Main --> Markets[Markets Page]
-    Main --> MarketDetail[Market Detail Page]
-    Main --> Dashboard[Dashboard Pages]
-    
-    Markets --> MarketCard[Market Card]
-    MarketCard --> CountdownTimer[Countdown Timer]
-    
-    MarketDetail --> BetDialog[Bet Dialog]
-    MarketDetail --> ActivityFeed[Activity Feed]
-    MarketDetail --> Comments[Comments Section]
-    MarketDetail --> MyBets[My Bets]
-    
-    BetDialog --> ValidationLogic[Validation Logic]
-    BetDialog --> SuccessModal[Success Modal]
-    
-    Dashboard --> MyBetsPage[My Bets Page]
-    Dashboard --> CreateMarket[Create Market]
-    
-    subgraph "Shared Components"
-        Button[Button]
-        Input[Input]
-        Modal[Modal]
-        Card[Card]
-    end
-    
-    BetDialog --> Button
-    BetDialog --> Input
-    BetDialog --> Modal
-    MarketCard --> Card
-```
-
-## 🔄 Real-time Data Flow
-
-```mermaid
-sequenceDiagram
-    participant User1
-    participant Frontend1
-    participant User2
-    participant Frontend2
-    participant Contract
-    participant Supabase
-    
-    User1->>Frontend1: Place Bet
-    Frontend1->>Contract: Submit Transaction
-    Contract-->>Frontend1: Transaction Confirmed
-    
-    Frontend1->>Supabase: Record Bet Activity
-    Supabase-->>Frontend1: Activity Saved
-    
-    Frontend2->>Supabase: Fetch Latest Activity
-    Supabase-->>Frontend2: New Bet Activity
-    Frontend2->>User2: Update Activity Feed
-    
-    User2->>Frontend2: Add Comment
-    Frontend2->>Supabase: Save Comment
-    Supabase-->>Frontend2: Comment Saved
-    
-    Frontend1->>Supabase: Fetch Comments
-    Supabase-->>Frontend1: New Comment
-    Frontend1->>User1: Update Comments
-```
-
-## 🎨 UI State Management
+## 6. Market Resolution Process
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Loading: App Starts
-    Loading --> Connected: Wallet Connected
-    Loading --> Disconnected: No Wallet
+    [*] --> Active
+    Active --> PendingResolution : Market End Time Reached
+    Active --> Resolved : Admin Resolves Early
+    PendingResolution --> Resolved : Admin Resolves Market
     
-    Disconnected --> Connecting: User Clicks Connect
-    Connecting --> Connected: Connection Success
-    Connecting --> Disconnected: Connection Failed
+    state Active {
+        [*] --> AcceptingBets
+        AcceptingBets --> UpdatingPrices : New Bet Placed
+        UpdatingPrices --> AcceptingBets : Prices Updated
+    }
     
-    Connected --> Trading: Browse Markets
-    Trading --> BettingDialog: Click Place Bet
-    BettingDialog --> Confirming: Submit Transaction
-    Confirming --> Success: Transaction Confirmed
-    Confirming --> Error: Transaction Failed
+    state Resolved {
+        [*] --> WinnersCalculated
+        WinnersCalculated --> PayoutsAvailable
+        PayoutsAvailable --> ClaimingWinnings
+        ClaimingWinnings --> [*] : All Claims Processed
+    }
     
-    Success --> Trading: Continue Trading
-    Error --> BettingDialog: Retry
-    
-    Trading --> MyBets: View History
-    MyBets --> Trading: Back to Markets
-    
-    Connected --> Disconnected: Wallet Disconnected
+    Resolved --> [*]
 ```
 
-## 🚀 Deployment Architecture
+## 7. Cross-Chain Transaction Verification
+
+```mermaid
+graph TD
+    A[Cross-Chain Transaction Initiated] --> B{Transaction Type}
+    
+    B -->|ETH Bridge| C[Verify ETH Payment on Sepolia]
+    B -->|Solana Signature| D[Verify Signature on Push]
+    B -->|Direct Push| E[Verify PC Payment on Push]
+    
+    C --> F[Check Bridge Contract Event]
+    D --> G[Validate Cross-Chain Signature]
+    E --> H[Confirm Push Transaction]
+    
+    F --> I{Payment Verified?}
+    G --> I
+    H --> I
+    
+    I -->|Yes| J[Execute Bet on Push Contract]
+    I -->|No| K[Reject Transaction]
+    
+    J --> L[Update Database]
+    K --> M[Return Error to User]
+    
+    L --> N[Sync with Frontend]
+    M --> O[Show Error Message]
+```
+
+## 8. Universal Hook System Architecture
 
 ```mermaid
 graph TB
-    subgraph "Development"
-        Dev[Local Development]
-        DevDB[(Local Supabase)]
-        TestNet[Creditcoin Testnet]
+    subgraph "Universal Hooks Layer"
+        UCR[useUniversalContractRead]
+        UT[useUniversalTransactions]
+        UEB[useEthBridge]
+        UP[usePushUniversal]
     end
     
-    subgraph "Production"
-        Vercel[Vercel Hosting]
-        ProdDB[(Supabase Production)]
-        MainNet[Creditcoin Mainnet]
+    subgraph "Chain-Specific Hooks"
+        PC[usePredictionContract]
+        WH[Wagmi Hooks]
+        SH[Solana Hooks]
     end
     
-    subgraph "CI/CD"
-        GitHub[GitHub Repository]
-        Actions[GitHub Actions]
-        Deploy[Auto Deploy]
+    subgraph "Transaction Handler"
+        TH[TransactionHandler]
+        SV[SignatureVerifier]
     end
     
-    Dev --> GitHub
-    GitHub --> Actions
-    Actions --> Deploy
-    Deploy --> Vercel
+    subgraph "Network Detection"
+        ND[Network Detection]
+        CS[Chain Switching]
+    end
     
-    Vercel --> ProdDB
-    Vercel --> MainNet
+    UCR --> PC
+    UCR --> WH
+    UT --> TH
+    UEB --> WH
+    UP --> SH
     
-    Dev --> DevDB
-    Dev --> TestNet
+    TH --> SV
+    TH --> ND
+    ND --> CS
     
-    style Vercel fill:#99ff99
-    style ProdDB fill:#9999ff
-    style MainNet fill:#ff9999
+    PC --> WH
+```
+
+## 9. Real-Time Data Synchronization
+
+```mermaid
+sequenceDiagram
+    participant BC as Blockchain
+    participant API as Backend API
+    participant DB as Supabase
+    participant FE as Frontend
+    participant U as User
+    
+    BC->>API: New transaction event
+    API->>DB: Store transaction data
+    DB->>API: Confirm storage
+    API->>FE: Real-time update via polling
+    FE->>U: Update UI with new data
+    
+    Note over API,DB: Auto-refresh every 30s
+    
+    U->>FE: Manual refresh action
+    FE->>API: Fetch latest data
+    API->>DB: Query recent activities
+    DB->>API: Return fresh data
+    API->>FE: Send updated information
+    FE->>U: Display current state
+```
+
+## 10. Security & Verification Flow
+
+```mermaid
+flowchart TD
+    A[User Transaction] --> B[Input Validation]
+    B --> C{Valid Input?}
+    C -->|No| D[Reject & Return Error]
+    C -->|Yes| E[Signature Verification]
+    
+    E --> F{Valid Signature?}
+    F -->|No| D
+    F -->|Yes| G[Cross-Chain Verification]
+    
+    G --> H{Chain Verified?}
+    H -->|No| D
+    H -->|Yes| I[Balance Check]
+    
+    I --> J{Sufficient Balance?}
+    J -->|No| D
+    J -->|Yes| K[Execute Transaction]
+    
+    K --> L[Update State]
+    L --> M[Emit Events]
+    M --> N[Success Response]
+    
+    D --> O[Log Security Event]
 ```
 
 ---
 
-*These diagrams provide a comprehensive overview of the Credit Predict system architecture, data flows, and component relationships. They serve as documentation for developers and stakeholders to understand the platform's technical implementation.*
+*These diagrams provide a comprehensive overview of the PushPredict universal cross-chain prediction market architecture, showing how different components interact to enable seamless betting across Ethereum Sepolia, Solana Devnet, and Push Network.*

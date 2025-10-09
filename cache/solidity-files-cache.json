@@ -193,6 +193,46 @@
       "artifacts": [
         "Context"
       ]
+    },
+    "C:\\Users\\enliven\\Documents\\GitHub\\push-predict\\contracts\\ETHBridge.sol": {
+      "lastModificationDate": 1760032053794,
+      "contentHash": "edbe1d26ae4e8c6e120b6fd8627a688f",
+      "sourceName": "contracts/ETHBridge.sol",
+      "solcConfig": {
+        "version": "0.8.22",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.22"
+      ],
+      "artifacts": [
+        "ETHBridge"
+      ]
     }
   }
 }

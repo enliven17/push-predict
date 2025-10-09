@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { usePredictionContract, usePredictionContractRead } from '@/hooks/use-prediction-contract';
 import { useUniversalTransactions } from '@/hooks/use-universal-transactions';
+import { useETHBridge } from '@/hooks/use-eth-bridge';
 import { useBetActivity } from '@/hooks/use-bet-activity';
 import { useAccount, useBalance, useChainId, useWalletClient } from 'wagmi';
 import { useWaitForTransactionReceipt } from 'wagmi';
@@ -38,6 +39,8 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   const [betAmount, setBetAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [bridgeStep, setBridgeStep] = useState<'idle' | 'bridging' | 'bridged' | 'signing' | 'completed'>('idle');
+  const [bridgeData, setBridgeData] = useState<{ bridgeId: string; ethTxHash: string } | null>(null);
   const [successData, setSuccessData] = useState<{
     amount: string;
     option: string;
@@ -51,6 +54,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   const chainId = useChainId();
   const { placeBet, isLoading, isSuccess, hash } = usePredictionContract();
   const { placeUniversalBet, isLoading: isUniversalLoading } = useUniversalTransactions();
+  const { bridgeForBet, calculateETHAmount, isLoading: isBridgeLoading } = useETHBridge();
   const { getMarket } = usePredictionContractRead();
   const { market } = getMarket(marketId);
   const { addBetActivity } = useBetActivity();
@@ -152,25 +156,61 @@ export const BetDialog: React.FC<BetDialogProps> = ({
         // Native Push Network transaction
         result = await placeBet(marketId, optionIndex as 0 | 1, betAmount);
       } else {
-        // Universal cross-chain transaction
+        // Cross-chain transaction with ETH bridge
         if (!walletClient) {
           toast.error('Wallet client not available');
           return;
         }
 
-        const provider = new ethers.BrowserProvider(walletClient.transport);
-        const signer = await provider.getSigner();
+        try {
+          // Step 1: Bridge ETH to PC
+          setBridgeStep('bridging');
+          toast.info('Step 1/2: Paying ETH...');
+          
+          const bridgeId = await bridgeForBet({
+            pcAmount: betAmount,
+            marketId,
+            option: optionIndex,
+            pushAddress: address
+          });
 
-        result = await placeUniversalBet(signer, {
-          marketId,
-          option: optionIndex,
-          amount: betAmount,
-          originChain: `eip155:${chainId}`,
-          originAddress: address
-        });
+          setBridgeData({ bridgeId, ethTxHash: bridgeId });
+          setBridgeStep('bridged');
+          toast.success('Step 1/2: ETH payment sent!');
 
-        // For universal bets, immediately record in Supabase since we have the result
+          // Small delay to prevent UI issues
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // Step 2: Sign for universal bet (no page refresh)
+          setBridgeStep('signing');
+          toast.info('Step 2/2: Please sign the bet transaction...');
+
+          const provider = new ethers.BrowserProvider(walletClient.transport);
+          const signer = await provider.getSigner();
+
+          result = await placeUniversalBet(signer, {
+            marketId,
+            option: optionIndex,
+            amount: betAmount,
+            originChain: `eip155:${chainId}`,
+            originAddress: address,
+            bridgeId
+          });
+
+          setBridgeStep('completed');
+          toast.success('Step 2/2: Universal bet placed!');
+          
+          // Trigger success modal for cross-chain bets
+          setShowSuccess(true);
+        } catch (bridgeError: any) {
+          console.error('❌ Bridge process failed:', bridgeError);
+          setBridgeStep('idle');
+          throw bridgeError;
+        }
+
+        // For universal bets, record in Supabase and trigger success modal
         if (result?.txHash) {
+          // Record bet activity
           addBetActivity({
             market_id: parseInt(marketId),
             user_address: address,
@@ -236,8 +276,12 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   };
 
   const isValidAmount = betAmount && parseFloat(betAmount) > 0;
-  // Only check balance for Push Network (native payments)
-  const hasInsufficientBalance = isPushNetwork && balance && betAmount && parseEther(betAmount) > balance.value;
+  // Check balance for all chains (ETH for cross-chain, PC for native)
+  const requiredAmount = isPushNetwork 
+    ? parseEther(betAmount || '0')
+    : parseEther(calculateETHAmount(betAmount || '0')); // ETH amount for bridge
+  
+  const hasInsufficientBalance = balance && betAmount && requiredAmount > balance.value;
   
   // Min/Max validation
   const getBetValidation = () => {
@@ -266,8 +310,23 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   
   const betValidation = getBetValidation();
 
+  const handleDialogChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Prevent closing during bridge process
+      if (bridgeStep === 'bridging' || bridgeStep === 'signing') {
+        toast.warning('Please wait for the transaction to complete');
+        return;
+      }
+      
+      // Reset bridge state when dialog closes
+      setBridgeStep('idle');
+      setBridgeData(null);
+    }
+    onOpenChange(isOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="bg-gradient-to-br from-[#1A1F2C] to-[#151923] border-gray-800/50 text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center justify-between">
@@ -317,8 +376,37 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                 <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20 mb-3">
                   <div className="flex items-center space-x-2 text-blue-400 text-sm">
                     <Network className="h-4 w-4" />
-                    <span>Universal Cross-Chain: Sign with your {chainInfo.name} wallet, bet executes on Push Network</span>
+                    <span>Cross-Chain Bridge: Pay {calculateETHAmount(betAmount || '0')} {chainInfo.currency} → {betAmount || '0'} PC</span>
                   </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Your {chainInfo.currency} will be bridged to PC tokens on Push Network
+                  </div>
+                  
+                  {/* Bridge Steps */}
+                  {bridgeStep !== 'idle' && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className={`w-2 h-2 rounded-full ${
+                          bridgeStep === 'bridging' ? 'bg-yellow-400 animate-pulse' :
+                          ['bridged', 'signing', 'completed'].includes(bridgeStep) ? 'bg-green-400' : 'bg-gray-400'
+                        }`} />
+                        <span className={bridgeStep === 'bridging' ? 'text-yellow-400' : 
+                                       ['bridged', 'signing', 'completed'].includes(bridgeStep) ? 'text-green-400' : 'text-gray-400'}>
+                          Step 1: Pay ETH
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className={`w-2 h-2 rounded-full ${
+                          bridgeStep === 'signing' ? 'bg-yellow-400 animate-pulse' :
+                          bridgeStep === 'completed' ? 'bg-green-400' : 'bg-gray-400'
+                        }`} />
+                        <span className={bridgeStep === 'signing' ? 'text-yellow-400' : 
+                                       bridgeStep === 'completed' ? 'text-green-400' : 'text-gray-400'}>
+                          Step 2: Sign bet transaction
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="relative">
@@ -348,7 +436,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
               </div>
               {!isPushNetwork && (
                 <div className="text-xs text-gray-500 text-center">
-                  No {chainInfo.currency} payment required - signature only
+                  Bridge: {calculateETHAmount(betAmount || '0')} {chainInfo.currency} → {betAmount || '0'} PC
                 </div>
               )}
               
@@ -444,20 +532,23 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 className="flex-1 bg-gray-800/30 border-gray-700 text-gray-300 hover:bg-gray-700/50 hover:text-white"
-                disabled={isSubmitting || isLoading}
+                disabled={isSubmitting || isLoading || bridgeStep === 'bridging' || bridgeStep === 'signing'}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white shadow-lg"
-                disabled={!isValidAmount || hasInsufficientBalance || !betValidation.isValid || isSubmitting || isLoading || isUniversalLoading || isConfirming || !address}
+                disabled={!isValidAmount || hasInsufficientBalance || !betValidation.isValid || isSubmitting || isLoading || isUniversalLoading || isBridgeLoading || isConfirming || !address}
               >
-                {isSubmitting || isLoading || isUniversalLoading || isConfirming ? (
+                {isSubmitting || isLoading || isUniversalLoading || isBridgeLoading || isConfirming ? (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>
-                      {isSubmitting || isLoading || isUniversalLoading ? 
+                      {bridgeStep === 'bridging' ? 'Step 1/2: Paying ETH...' :
+                       bridgeStep === 'signing' ? 'Step 2/2: Sign transaction...' :
+                       isBridgeLoading ? 'Bridging ETH...' :
+                       isSubmitting || isLoading || isUniversalLoading ? 
                         (isPushNetwork ? 'Placing Bet...' : 'Processing Universal Bet...') : 
                         'Confirming...'
                       }
@@ -562,7 +653,10 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                         variant="outline"
                         className="h-6 px-2 text-xs bg-gray-700/50 border-gray-600 text-gray-300 hover:bg-gray-600/50"
                         onClick={() => {
-                          window.open(`https://explorer.creditcoin.org/tx/${successData.txHash}`, '_blank');
+                          const explorerUrl = isPushNetwork 
+                            ? `https://donut.push.network/tx/${successData.txHash}`
+                            : `https://donut.push.network/tx/${successData.txHash}`; // Universal bets execute on Push Network
+                          window.open(explorerUrl, '_blank');
                         }}
                       >
                         <ExternalLink className="h-3 w-3" />
@@ -577,6 +671,20 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                 <p className="text-xs text-gray-400">
                   Click copy to get full hash or view on explorer
                 </p>
+                
+                {/* Cross-chain Bridge Info */}
+                {!isPushNetwork && bridgeData && (
+                  <div className="mt-3 p-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/20">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Network className="h-4 w-4 text-blue-400" />
+                      <span className="text-xs font-medium text-blue-400">Cross-Chain Bridge</span>
+                    </div>
+                    <div className="text-xs text-gray-300">
+                      <div>ETH Payment: {bridgeData.ethTxHash.slice(0, 10)}...{bridgeData.ethTxHash.slice(-10)}</div>
+                      <div>Push Bet: {successData.txHash.slice(0, 10)}...{successData.txHash.slice(-10)}</div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Next Steps */}

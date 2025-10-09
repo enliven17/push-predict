@@ -130,7 +130,7 @@ export const MyBets: React.FC<MyBetsProps> = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3 max-h-96 overflow-y-auto">
+        <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-card pr-2">
           {betsToShow.map((bet) => (
             <Card key={bet.id} className="bg-gradient-to-r from-[#1A1F2C] to-[#151923] border-gray-800/50">
               <CardContent className="p-4">

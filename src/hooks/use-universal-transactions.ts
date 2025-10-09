@@ -9,6 +9,7 @@ export interface UniversalBetParams {
   amount: string;
   originChain: string;
   originAddress: string;
+  bridgeId?: string; // Optional bridge ID for cross-chain payments
 }
 
 export const useUniversalTransactions = () => {
@@ -68,7 +69,8 @@ export const useUniversalTransactions = () => {
           ...params,
           signature,
           message,
-          nonce
+          nonce,
+          bridgeId: params.bridgeId
         })
       });
 

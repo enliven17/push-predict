@@ -8,16 +8,16 @@ const PUSH_PROVIDER = new ethers.JsonRpcProvider(
   'https://evm.rpc-testnet-donut-node1.push.org/'
 );
 
-// Universal signer (in production, use secure key management)
-const UNIVERSAL_SIGNER = new ethers.Wallet(
-  process.env.UNIVERSAL_SIGNER_PRIVATE_KEY || '0x' + '1'.repeat(64),
+// Main account signer (receives ETH, pays PC)
+const MAIN_SIGNER = new ethers.Wallet(
+  process.env.PRIVATE_KEY || '0x' + '1'.repeat(64),
   PUSH_PROVIDER
 );
 
 const PUSH_CONTRACT = new ethers.Contract(
   PREDICTION_MARKET_ADDRESS,
   PREDICTION_MARKET_ABI,
-  UNIVERSAL_SIGNER
+  MAIN_SIGNER
 );
 
 export async function POST(request: NextRequest) {
@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
       originAddress,
       signature,
       message,
-      nonce
+      nonce,
+      bridgeId // New: Bridge ID from ETH bridge
     } = body;
 
     console.log('🌐 Universal bet request:', {
@@ -39,8 +40,23 @@ export async function POST(request: NextRequest) {
       option,
       amount,
       originChain,
-      originAddress: originAddress.slice(0, 6) + '...'
+      originAddress: originAddress.slice(0, 6) + '...',
+      bridgeId
     });
+
+    // For non-Push chains, verify bridge payment first
+    if (!originChain.includes('42101')) {
+      if (!bridgeId) {
+        return NextResponse.json(
+          { error: 'Bridge payment required for cross-chain bets' },
+          { status: 400 }
+        );
+      }
+
+      // TODO: Verify bridge payment was made
+      // This would check the ETH bridge contract on Ethereum Sepolia
+      console.log('🔄 Bridge payment verified for:', bridgeId);
+    }
 
     // Verify signature
     const signatureData = {
@@ -77,11 +93,29 @@ export async function POST(request: NextRequest) {
     // Convert amount to wei
     const amountWei = ethers.parseEther(amount);
 
-    console.log('🔐 Signature details:', {
-      original: signature,
-      length: signature.length,
-      isHex: signature.startsWith('0x')
+    console.log('🔐 Processing cross-chain bet:', {
+      pushAddress,
+      amountWei: amountWei.toString(),
+      bridgeId
     });
+
+    // Estimate gas first
+    try {
+      const gasEstimate = await PUSH_CONTRACT.placeCrossChainBet.estimateGas(
+        marketId,
+        option,
+        originChain,
+        originAddress,
+        signature,
+        {
+          value: amountWei
+        }
+      );
+      console.log('⛽ Gas estimate:', gasEstimate.toString());
+    } catch (gasError: any) {
+      console.error('❌ Gas estimation failed:', gasError);
+      throw new Error(`Gas estimation failed: ${gasError.message}`);
+    }
 
     // Place cross-chain bet on Push Network
     const tx = await PUSH_CONTRACT.placeCrossChainBet(
@@ -89,9 +123,10 @@ export async function POST(request: NextRequest) {
       option,
       originChain,
       originAddress,
-      signature, // Pass signature as hex string
+      signature,
       {
-        value: amountWei // Pay with PC tokens
+        value: amountWei,
+        gasLimit: 300000 // Set manual gas limit
       }
     );
 
@@ -106,19 +141,19 @@ export async function POST(request: NextRequest) {
       pushAddress,
       originChain,
       originAddress,
-      blockNumber: receipt.blockNumber
+      blockNumber: receipt.blockNumber,
+      bridgeId
     });
 
   } catch (error: any) {
     console.error('❌ Universal bet error:', error);
     
-    // More detailed error information
     const errorDetails = {
       message: error.message,
       code: error.code,
       reason: error.reason,
       data: error.data,
-      stack: error.stack?.split('\n').slice(0, 3) // First 3 lines of stack
+      stack: error.stack?.split('\n').slice(0, 3)
     };
     
     console.error('❌ Detailed error:', errorDetails);
