@@ -2,6 +2,7 @@
 "use client";
 
 import { MarketCard } from "@/components/market/market-card";
+import { CryptoPricesDashboard } from "@/components/market/crypto-prices-dashboard";
 import { Button } from "@/components/ui/button";
 import { useUniversalContractRead } from "@/hooks/use-universal-contract-read";
 import { ArrowRight, TrendingUp, BarChart3, Activity, Coins, Users } from "lucide-react";

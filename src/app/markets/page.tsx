@@ -3,6 +3,7 @@
 import { MarketCard } from "@/components/market/market-card";
 import { MarketError } from "@/components/market/market-error";
 import { MarketLoading } from "@/components/market/market-loading";
+import { CryptoPricesDashboard } from "@/components/market/crypto-prices-dashboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,6 +160,11 @@ export default function MarketsPage() {
               </p>
               <p className="text-xs text-gray-500 mt-1">Awaiting resolution</p>
             </div>
+          </div>
+
+          {/* Live Crypto Prices Dashboard */}
+          <div className="mb-8">
+            <CryptoPricesDashboard />
           </div>
 
           {/* Search */}

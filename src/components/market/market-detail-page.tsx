@@ -7,6 +7,7 @@ import { MarketError } from "@/components/market/market-error";
 import { MarketLoading } from "@/components/market/market-loading";
 import { MarketActivity } from "@/components/market/market-activity";
 import { MyBets } from "@/components/market/my-bets";
+import { LivePriceDisplay } from "@/components/market/live-price-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -143,12 +144,13 @@ export default function MarketDetailPage() {
   };
 
   const handleBetSuccess = () => {
-    setBetDialogOpen(false);
+    // Don't close the dialog immediately, let user see success modal first
+    // Just refresh the data in background
     setTimeout(() => {
-      // Refresh contract data
+      // Refresh contract data without page reload
       refetchMarket();
       refetchPosition();
-    }, 2000);
+    }, 1000); // Shorter delay for better UX
   };
 
   const handleClaimWinnings = async () => {
@@ -297,6 +299,15 @@ export default function MarketDetailPage() {
               <DollarSign className="h-4 w-4 text-green-400" />
               <span>{formatCurrency(market.totalPool)} PC volume</span>
             </div>
+          </div>
+
+          {/* Live Price Display */}
+          <div className="mt-6 pt-6 border-t border-gray-800/50">
+            <LivePriceDisplay 
+              marketTitle={market.title}
+              size="lg"
+              className="justify-center"
+            />
           </div>
         </div>
 
