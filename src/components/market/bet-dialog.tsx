@@ -377,6 +377,29 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                     PC
                   </div>
                 </div>
+
+                {/* Quick Bet Buttons */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-gray-300">Quick Amounts:</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[0.1, 0.5, 1, 5].map((amount) => (
+                      <Button
+                        key={amount}
+                        type="button"
+                        variant="outline"
+                        onClick={() => setBetAmount(amount.toString())}
+                        className={`h-10 px-4 text-sm font-medium bg-gradient-to-r from-gray-800/50 to-gray-700/50 border-gray-600 text-gray-200 hover:from-[#22c55e]/20 hover:to-[#16a34a]/20 hover:border-[#22c55e]/60 hover:text-[#22c55e] transition-all duration-200 hover:scale-105 ${
+                          betAmount === amount.toString() ? 'from-[#22c55e]/30 to-[#16a34a]/30 border-[#22c55e]/80 text-[#22c55e]' : ''
+                        }`}
+                        disabled={isSubmitting || isLoading}
+                      >
+                        {amount} PC
+                      </Button>
+                    ))}
+                  </div>
+                </div>
                 
                 {/* Balance Info */}
                 <div className="flex justify-between text-xs text-gray-400">

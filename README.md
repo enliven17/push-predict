@@ -8,7 +8,8 @@ The world's first **Universal Cross-Chain Prediction Market** platform powered b
 - **🔄 Real Cross-Chain Bridge** - Pay ETH, bet with PC tokens automatically
 - **⚡ Universal Signer** - Sign once, execute anywhere with Push Network SDK
 - **🎯 Binary Prediction Markets** - Trade on Yes/No outcomes across chains
-- **📊 Real-time Activity** - Live cross-chain bet tracking and updates
+- **📊 Live Price Feeds** - Real-time crypto prices powered by Pyth Network
+- **📈 Real-time Activity** - Live cross-chain bet tracking and updates
 - **👤 Universal Dashboard** - Complete multi-chain betting history
 - **💬 Comments System** - Market discussions and community engagement
 - **🔧 Admin Controls** - Universal market creation and resolution
@@ -18,6 +19,7 @@ The world's first **Universal Cross-Chain Prediction Market** platform powered b
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
 - **Universal Blockchain**: Push Network Donut Testnet (Primary)
+- **Price Feeds**: Pyth Network (Real-time crypto prices)
 - **Cross-Chain Support**: Ethereum Sepolia, Solana Devnet
 - **Universal SDK**: @pushchain/core for cross-chain interactions
 - **Smart Contracts**: Solidity with Universal Cross-Chain features
@@ -46,6 +48,13 @@ The world's first **Universal Cross-Chain Prediction Market** platform powered b
 - **Token**: SOL (Testnet Solana)
 - **Bridge**: SOL → PC automatic conversion
 - **Explorer**: https://explorer.solana.com/?cluster=devnet
+
+### 📊 Pyth Network (Price Feeds)
+- **Service**: Real-time price data provider
+- **API**: Hermes API (https://hermes.pyth.network)
+- **Update Frequency**: Every 5 seconds
+- **Supported Assets**: BTC, ETH, SOL, USDC, USDT
+- **Integration**: Automatic price detection for crypto markets
 
 ## 🚀 Quick Start
 
@@ -111,6 +120,10 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role_key>
 
 # App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Pyth Network (Price Feeds)
+# No API key required - uses public Hermes API
+# Automatic integration for crypto price feeds
 ```
 
 ## 🌐 Deployment

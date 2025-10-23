@@ -340,6 +340,84 @@ flowchart TD
     D --> O[Log Security Event]
 ```
 
+## 11. Pyth Network Price Feed Integration
+
+```mermaid
+graph TB
+    subgraph "Pyth Network"
+        PH[Pyth Hermes API]
+        PF[Price Feeds]
+        PD[Price Data]
+    end
+    
+    subgraph "PushPredict Frontend"
+        PC[Price Client]
+        PH_HOOK[usePythPrices Hook]
+        PD_COMP[Price Display Components]
+        MD[Market Detail Page]
+        MP[Markets Page]
+    end
+    
+    subgraph "Price Feed IDs"
+        BTC[BTC/USD Feed]
+        ETH[ETH/USD Feed]
+        SOL[SOL/USD Feed]
+        USDC[USDC/USD Feed]
+        USDT[USDT/USD Feed]
+    end
+    
+    PH --> PC
+    PF --> PH
+    PD --> PF
+    
+    PC --> PH_HOOK
+    PH_HOOK --> PD_COMP
+    PD_COMP --> MD
+    PD_COMP --> MP
+    
+    BTC --> PF
+    ETH --> PF
+    SOL --> PF
+    USDC --> PF
+    USDT --> PF
+    
+    Note1[Real-time updates every 5 seconds]
+    Note2[Automatic price detection for crypto markets]
+    Note3[Professional-grade financial data]
+```
+
+## 12. Live Price Display Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant PH as Pyth Hook
+    participant PA as Pyth API
+    participant PC as Price Component
+    
+    U->>F: Visit Markets Page
+    F->>PH: Initialize useCryptoPrices()
+    PH->>PA: Fetch latest prices
+    PA->>PH: Return price data
+    PH->>PC: Update price components
+    PC->>U: Display live prices
+    
+    loop Every 5 seconds
+        PH->>PA: Refetch prices
+        PA->>PH: Return updated data
+        PH->>PC: Update displays
+        PC->>U: Show new prices
+    end
+    
+    U->>F: View Market Detail
+    F->>PH: Check market title for crypto
+    PH->>PA: Fetch specific price feed
+    PA->>PH: Return market price
+    PH->>PC: Display market-specific price
+    PC->>U: Show live price for market asset
+```
+
 ---
 
-*These diagrams provide a comprehensive overview of the PushPredict universal cross-chain prediction market architecture, showing how different components interact to enable seamless betting across Ethereum Sepolia, Solana Devnet, and Push Network.*
+*These diagrams provide a comprehensive overview of the PushPredict universal cross-chain prediction market architecture, including Pyth Network integration for real-time price feeds, showing how different components interact to enable seamless betting across Ethereum Sepolia, Solana Devnet, and Push Network.*
