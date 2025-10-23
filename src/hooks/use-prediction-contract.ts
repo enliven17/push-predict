@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 export const usePredictionContract = () => {
   const [isLoading, setIsLoading] = useState(false);
   
-  const { writeContract, data: hash, error, isPending } = useWriteContract();
+  const { writeContractAsync, data: hash, error, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -19,7 +19,7 @@ export const usePredictionContract = () => {
       setIsLoading(true);
       console.log('🎯 Placing bet:', { marketId, option, amount });
       
-      const result = await writeContract({
+      const txHash = await writeContractAsync({
         address: PREDICTION_MARKET_ADDRESS,
         abi: PREDICTION_MARKET_ABI,
         functionName: 'placeBet',
@@ -27,8 +27,9 @@ export const usePredictionContract = () => {
         value: parseEther(amount),
       });
       
+      console.log('🎯 Transaction hash received:', txHash);
       toast.success('Bet transaction submitted!');
-      return result;
+      return txHash;
     } catch (error: any) {
       console.error('❌ Error placing bet:', error);
       toast.error(error?.message || 'Failed to place bet');

@@ -41,6 +41,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [bridgeStep, setBridgeStep] = useState<'idle' | 'bridging' | 'bridged' | 'signing' | 'completed'>('idle');
+  const [pushStep, setPushStep] = useState<'idle' | 'confirming' | 'completed'>('idle');
   const [bridgeData, setBridgeData] = useState<{ bridgeId: string; ethTxHash: string } | null>(null);
   const [successData, setSuccessData] = useState<{
     amount: string;
@@ -74,14 +75,23 @@ export const BetDialog: React.FC<BetDialogProps> = ({
   const optionIndex = selectedSide === 'optionA' ? 0 : 1;
 
   // Validation
-  const isValidAmount = betAmount && parseFloat(betAmount) > 0;
+  const isValidAmount = betAmount && parseFloat(betAmount) > 0 && !isNaN(parseFloat(betAmount));
   const hasInsufficientBalance = balance && isValidAmount && 
     parseFloat(formatEther(balance.value)) < parseFloat(betAmount);
+  
+  // Market-specific validation
+  const marketValidation = market ? {
+    tooLow: isValidAmount && parseFloat(betAmount) < parseFloat(market.minBet),
+    tooHigh: isValidAmount && parseFloat(betAmount) > parseFloat(market.maxBet)
+  } : { tooLow: false, tooHigh: false };
 
   const betValidation = {
-    isValid: isValidAmount && !hasInsufficientBalance,
-    message: !isValidAmount ? 'Enter a valid amount' : 
-             hasInsufficientBalance ? 'Insufficient balance' : ''
+    isValid: isValidAmount && !hasInsufficientBalance && !marketValidation.tooLow && !marketValidation.tooHigh,
+    message: !betAmount ? '' : // Don't show error if input is empty
+             !isValidAmount ? 'Enter a valid amount' : 
+             hasInsufficientBalance ? 'Insufficient balance' :
+             marketValidation.tooLow ? `Minimum bet: ${market?.minBet} PC` :
+             marketValidation.tooHigh ? `Maximum bet: ${market?.maxBet} PC` : ''
   };
 
   // ETH amount calculation for bridge
@@ -134,20 +144,33 @@ export const BetDialog: React.FC<BetDialogProps> = ({
       
       if (isPushNetwork) {
         // Native Push Network transaction
-        result = await placeBet(marketId, optionIndex as 0 | 1, betAmount);
+        console.log('🔥 Starting Push Network bet...');
+        setPushStep('confirming');
+        toast.info('Please confirm the transaction in your wallet...');
         
-        if (result?.txHash) {
+        result = await placeBet(marketId, optionIndex as 0 | 1, betAmount);
+        console.log('🔥 Push bet result:', result);
+        
+        if (result) {
+          console.log('🔥 Push bet successful, setting up success modal...');
+          setPushStep('completed');
+          toast.success('Bet placed successfully!');
+          
           // Prepare success data for Push Network bets
-          setSuccessData({
+          const successDataObj = {
             amount: betAmount,
             option: selectedOption,
             shares: betAmount,
-            pushTxHash: result.txHash,
-            chainUsed: 'push'
-          });
-          setShowSuccess(true);
+            pushTxHash: result, // Now we have the real transaction hash
+            chainUsed: 'push' as const
+          };
+          console.log('🔥 Success data:', successDataObj);
           
-          // Record bet activity
+          setSuccessData(successDataObj);
+          setShowSuccess(true);
+          console.log('🔥 Success modal should be showing now');
+          
+          // Record bet activity with real transaction hash
           addBetActivity({
             market_id: parseInt(marketId),
             user_address: address,
@@ -156,11 +179,15 @@ export const BetDialog: React.FC<BetDialogProps> = ({
             option: optionIndex,
             amount: betAmount,
             shares: betAmount,
-            tx_hash: result.txHash,
-            block_number: result.blockNumber || undefined
+            tx_hash: result, // Real transaction hash
+            block_number: undefined
           }).catch(err => {
             console.error('Failed to record bet activity:', err);
           });
+          
+          // Don't reset form here - wait for success modal to be closed
+        } else {
+          console.log('🔥 Push bet result is null/undefined');
         }
       } else {
         // Cross-chain transaction with ETH bridge
@@ -266,9 +293,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
         }
       }
       
-      // Reset form
-      setBetAmount('');
-      
+      // Don't reset form here - only reset after success modal is closed
       // Don't call onSuccess immediately to prevent page refresh
       // Data will be refreshed when user closes the success modal
       
@@ -278,6 +303,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
     } finally {
       setIsSubmitting(false);
       setBridgeStep('idle');
+      setPushStep('idle');
     }
   };
 
@@ -324,7 +350,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
             </div>
 
             {/* Bet Amount Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <Label htmlFor="betAmount" className="text-sm font-medium text-gray-300">
                   Bet Amount
@@ -358,13 +384,27 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                   </div>
                 )}
 
+                {/* Push Network Steps Indicator */}
+                {isPushNetwork && pushStep !== 'idle' && (
+                  <div className="bg-gray-800/30 rounded-lg p-3 mb-4">
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        pushStep === 'confirming' ? 'bg-yellow-400 animate-pulse' :
+                        pushStep === 'completed' ? 'bg-green-400' : 'bg-gray-400'
+                      }`} />
+                      <span className={pushStep === 'confirming' ? 'text-yellow-400' : 
+                                     pushStep === 'completed' ? 'text-green-400' : 'text-gray-400'}>
+                        {pushStep === 'confirming' ? 'Confirming transaction...' : 'Transaction confirmed!'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="relative">
                   <Input
                     id="betAmount"
                     type="number"
                     step="0.01"
-                    min={market ? market.minBet : "0"}
-                    max={market ? market.maxBet : undefined}
                     placeholder={market ? `${market.minBet} - ${market.maxBet}` : "0.00"}
                     value={betAmount}
                     onChange={(e) => setBetAmount(e.target.value)}
@@ -372,6 +412,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                       !betValidation.isValid ? 'border-red-500/50 focus:border-red-500' : ''
                     }`}
                     disabled={isSubmitting || isLoading}
+                    noValidate
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-400">
                     PC
@@ -443,7 +484,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                 <Button
                   type="submit"
                   className="flex-1 bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white shadow-lg"
-                  disabled={!isValidAmount || hasInsufficientBalance || !betValidation.isValid || isSubmitting || isLoading || isUniversalLoading || isBridgeLoading || !address}
+                  disabled={!isValidAmount || hasInsufficientBalance || !betValidation.isValid || isSubmitting || isLoading || isUniversalLoading || isBridgeLoading || pushStep === 'confirming' || !address}
                 >
                   {isSubmitting || isLoading || isUniversalLoading || isBridgeLoading ? (
                     <div className="flex items-center space-x-2">
@@ -451,6 +492,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                       <span>
                         {bridgeStep === 'bridging' ? 'Step 1/2: Paying ETH...' :
                          bridgeStep === 'signing' ? 'Step 2/2: Sign transaction...' :
+                         pushStep === 'confirming' ? 'Confirming transaction...' :
                          isBridgeLoading ? 'Bridging ETH...' :
                          isSubmitting || isLoading || isUniversalLoading ? 
                           (isPushNetwork ? 'Placing Bet...' : 'Processing Universal Bet...') : 
@@ -470,20 +512,26 @@ export const BetDialog: React.FC<BetDialogProps> = ({
 
       {/* Success Modal */}
       {successData && (
-        <BetSuccessModal
-          open={showSuccess}
-          onOpenChange={(open) => {
-            if (!open) {
-              setShowSuccess(false);
-              setSuccessData(null);
-              // Refresh data when success modal is closed
-              if (onSuccess) {
-                onSuccess();
+        <>
+          {console.log('🔥 Rendering success modal with data:', successData, 'showSuccess:', showSuccess)}
+          <BetSuccessModal
+            open={showSuccess}
+            onOpenChange={(open) => {
+              console.log('🔥 Success modal onOpenChange:', open);
+              if (!open) {
+                setShowSuccess(false);
+                setSuccessData(null);
+                // Reset form when success modal is closed
+                setBetAmount('');
+                // Refresh data when success modal is closed
+                if (onSuccess) {
+                  onSuccess();
+                }
               }
-            }
-          }}
-          betDetails={successData}
-        />
+            }}
+            betDetails={successData}
+          />
+        </>
       )}
     </>
   );
