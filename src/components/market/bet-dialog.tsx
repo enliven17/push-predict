@@ -269,10 +269,8 @@ export const BetDialog: React.FC<BetDialogProps> = ({
       // Reset form
       setBetAmount('');
       
-      // Call success callback for data refresh
-      if (onSuccess) {
-        onSuccess();
-      }
+      // Don't call onSuccess immediately to prevent page refresh
+      // Data will be refreshed when user closes the success modal
       
     } catch (error: any) {
       console.error('❌ Bet failed:', error);
@@ -455,7 +453,10 @@ export const BetDialog: React.FC<BetDialogProps> = ({
             if (!open) {
               setShowSuccess(false);
               setSuccessData(null);
-              // Don't close the main dialog, allow continued trading
+              // Refresh data when success modal is closed
+              if (onSuccess) {
+                onSuccess();
+              }
             }
           }}
           betDetails={successData}

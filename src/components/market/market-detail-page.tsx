@@ -144,13 +144,9 @@ export default function MarketDetailPage() {
   };
 
   const handleBetSuccess = () => {
-    // Don't close the dialog immediately, let user see success modal first
-    // Just refresh the data in background
-    setTimeout(() => {
-      // Refresh contract data without page reload
-      refetchMarket();
-      refetchPosition();
-    }, 1000); // Shorter delay for better UX
+    // Refresh contract data when success modal is closed
+    refetchMarket();
+    refetchPosition();
   };
 
   const handleClaimWinnings = async () => {
