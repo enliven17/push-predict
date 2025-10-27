@@ -8,7 +8,7 @@ export async function GET() {
       native: true,
       currency: 'PC',
       rpcUrl: 'https://evm.rpc-testnet-donut-node1.push.org/',
-      explorerUrl: 'https://explorer-testnet.push.org/'
+      explorerUrl: 'https://donut.push.network/'
     },
     {
       namespace: 'eip155:11155111',

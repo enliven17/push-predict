@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, TrendingUp, TrendingDown, ExternalLink } from 'lucide-react';
 import { formatEther } from 'viem';
+import { openPushExplorerTx } from '@/utils/explorer';
 
 interface MarketActivityProps {
   marketId: string;
@@ -120,7 +121,7 @@ export const MarketActivity: React.FC<MarketActivityProps> = ({
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => {
-                      window.open(`https://explorer.creditcoin.org/tx/${activity.tx_hash}`, '_blank');
+                      openPushExplorerTx(activity.tx_hash);
                     }}
                     className="p-1 rounded hover:bg-gray-700/50 text-gray-400 hover:text-white transition-colors"
                     title="View on Explorer"

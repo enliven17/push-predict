@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, TrendingUp, TrendingDown, ExternalLink, User, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import { openPushExplorerTx } from '@/utils/explorer';
 
 interface MyBetsProps {
   marketId?: string;
@@ -205,7 +206,7 @@ export const MyBets: React.FC<MyBetsProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        window.open(`https://explorer.creditcoin.org/tx/${bet.tx_hash}`, '_blank');
+                        openPushExplorerTx(bet.tx_hash);
                       }}
                       className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
                       title="View on Explorer"
