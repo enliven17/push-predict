@@ -1,8 +1,11 @@
 ﻿import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
+import { usePushWalletContext, usePushChainClient, PushUI } from "@pushchain/ui-kit";
 
 export const useContractOwner = () => {
-  const { address, isConnected } = useAccount();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  const address = pushChainClient?.universal?.account;
+  const isConnected = connectionStatus === PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED;
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

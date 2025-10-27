@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useContractOwner } from '@/hooks/use-contract-owner';
-import { useAccount } from 'wagmi';
+import { usePushWalletContext, usePushChainClient, PushUI } from '@pushchain/ui-kit';
 import { Button } from '@/components/ui/button';
 import { Lock, AlertCircle } from 'lucide-react';
 import { truncateAddress } from '@/lib/utils';
@@ -18,7 +18,10 @@ export const OwnerOnly: React.FC<OwnerOnlyProps> = ({
   showFallback = true,
   showDebugInfo = false
 }) => {
-  const { address, isConnected } = useAccount();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  const address = pushChainClient?.universal?.account;
+  const isConnected = connectionStatus === PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED;
   const { isOwner, isLoading, error, contractAddress, userAddress } = useContractOwner();
 
   // Debug info for development

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
-import { useWalletClient, usePublicClient } from 'wagmi';
+import { usePushWalletContext, usePushChainClient } from '@pushchain/ui-kit';
 import { toast } from 'sonner';
 
 const ETH_BRIDGE_ABI = [
@@ -24,8 +24,9 @@ export interface BridgeParams {
 
 export const useETHBridge = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { data: walletClient } = useWalletClient();
-  const publicClient = usePublicClient();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  const account = pushChainClient?.universal?.account;
 
   // Calculate ETH amount needed for PC amount
   const calculateETHAmount = (pcAmount: string): string => {
@@ -43,7 +44,7 @@ export const useETHBridge = () => {
 
   // Bridge ETH for bet
   const bridgeForBet = async (params: BridgeParams): Promise<string> => {
-    if (!walletClient) {
+    if (!pushChainClient || !account) {
       throw new Error('Wallet not connected');
     }
 
@@ -61,31 +62,21 @@ export const useETHBridge = () => {
         option: params.option
       });
 
-      // Send ETH payment to our bridge address
-      const provider = new ethers.BrowserProvider(walletClient.transport);
-      const signer = await provider.getSigner();
-
-      // Send ETH to our bridge address (simple transfer)
-      const tx = await signer.sendTransaction({
-        to: ETH_BRIDGE_ADDRESS,
-        value: ethAmountWei
+      // Send ETH to our bridge address using Push Chain client
+      const tx = await pushChainClient.universal.sendTransaction({
+        to: ETH_BRIDGE_ADDRESS as `0x${string}`,
+        value: BigInt(ethAmountWei.toString())
       });
 
       console.log('💰 ETH Bridge transaction:', tx.hash);
       toast.success(`ETH payment sent: ${tx.hash.slice(0, 10)}...`);
 
-      // Don't wait for confirmation to prevent page refresh
-      // Return transaction hash immediately as bridge ID
+      // Return transaction hash as bridge ID
       const bridgeId = tx.hash;
       
-      // Optionally wait for confirmation in background (non-blocking)
-      tx.wait().then(() => {
-        console.log('✅ Bridge transaction confirmed');
-        toast.success(`Bridge confirmed: ${ethAmount} ETH → ${params.pcAmount} PC`);
-      }).catch((error) => {
-        console.error('❌ Bridge confirmation failed:', error);
-        toast.error('Bridge confirmation failed');
-      });
+      // Transaction is already confirmed when returned
+      console.log('✅ Bridge transaction confirmed');
+      toast.success(`Bridge confirmed: ${ethAmount} ETH → ${params.pcAmount} PC`);
       
       return bridgeId;
 

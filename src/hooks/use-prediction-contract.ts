@@ -1,37 +1,47 @@
-import { useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseEther, formatEther } from 'viem';
+import { usePushWalletContext, usePushChainClient } from '@pushchain/ui-kit';
+import { ethers } from 'ethers';
 import { PREDICTION_MARKET_ABI, PREDICTION_MARKET_ADDRESS } from '@/lib/contracts/prediction-market';
 import { Market } from '@/types/market';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useUniversalContractRead } from './use-universal-contract-read';
 
 export const usePredictionContract = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [hash, setHash] = useState<string | null>(null);
+  const [error, setError] = useState<any>(null);
   
-  const { writeContractAsync, data: hash, error, isPending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
 
   // Place Bet Function
   const placeBet = async (marketId: string, option: 0 | 1, amount: string) => {
+    if (!pushChainClient) {
+      throw new Error('Push Chain client not available');
+    }
+
     try {
       setIsLoading(true);
+      setError(null);
       console.log('🎯 Placing bet:', { marketId, option, amount });
       
-      const txHash = await writeContractAsync({
-        address: PREDICTION_MARKET_ADDRESS,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: 'placeBet',
-        args: [BigInt(marketId), option],
-        value: parseEther(amount),
+      // Create contract interface
+      const contractInterface = new ethers.Interface(PREDICTION_MARKET_ABI);
+      const data = contractInterface.encodeFunctionData('placeBet', [BigInt(marketId), option]);
+      
+      const tx = await pushChainClient.universal.sendTransaction({
+        to: PREDICTION_MARKET_ADDRESS as `0x${string}`,
+        data,
+        value: BigInt(ethers.parseEther(amount).toString())
       });
       
-      console.log('🎯 Transaction hash received:', txHash);
+      console.log('🎯 Transaction hash received:', tx.hash);
+      setHash(tx.hash);
       toast.success('Bet transaction submitted!');
-      return txHash;
+      return tx.hash;
     } catch (error: any) {
       console.error('❌ Error placing bet:', error);
+      setError(error);
       toast.error(error?.message || 'Failed to place bet');
       throw error;
     } finally {
@@ -41,21 +51,28 @@ export const usePredictionContract = () => {
 
   // Resolve Market (Admin only)
   const resolveMarket = async (marketId: string, outcome: 0 | 1) => {
+    if (!pushChainClient) {
+      throw new Error('Push Chain client not available');
+    }
+
     try {
       setIsLoading(true);
+      setError(null);
       console.log('⚖️ Resolving market:', { marketId, outcome });
       
-      const result = await writeContract({
-        address: PREDICTION_MARKET_ADDRESS,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: 'resolveMarket',
-        args: [BigInt(marketId), outcome],
+      const contractInterface = new ethers.Interface(PREDICTION_MARKET_ABI);
+      const data = contractInterface.encodeFunctionData('resolveMarket', [BigInt(marketId), outcome]);
+      
+      const tx = await pushChainClient.universal.sendTransaction({
+        to: PREDICTION_MARKET_ADDRESS as `0x${string}`,
+        data
       });
       
       toast.success('Market resolution submitted!');
-      return result;
+      return tx.hash;
     } catch (error: any) {
       console.error('❌ Error resolving market:', error);
+      setError(error);
       toast.error(error?.message || 'Failed to resolve market');
       throw error;
     } finally {
@@ -136,100 +153,26 @@ export const usePredictionContract = () => {
     resolveMarket,
     createMarket,
     claimWinnings,
-    isLoading: isLoading || isPending || isConfirming,
-    isSuccess,
+    isLoading,
+    isSuccess: !!hash,
     hash,
     error,
   };
 };
 
-// Hook to read contract data
+// Hook to read contract data - now uses universal contract read
 export const usePredictionContractRead = () => {
-  // Get all markets
-  const { data: allMarkets, isLoading: allMarketsLoading, refetch: refetchAllMarkets } = useReadContract({
-    address: PREDICTION_MARKET_ADDRESS,
-    abi: PREDICTION_MARKET_ABI,
-    functionName: 'getAllMarkets',
-  });
-
-  // Get active markets
-  const { data: activeMarkets, isLoading: activeMarketsLoading, refetch: refetchActiveMarkets } = useReadContract({
-    address: PREDICTION_MARKET_ADDRESS,
-    abi: PREDICTION_MARKET_ABI,
-    functionName: 'getActiveMarkets',
-  });
-
-  // Transform contract data to Market type
-  const transformContractMarket = (contractMarket: any): Market => {
-    return {
-      id: contractMarket.id.toString(),
-      title: contractMarket.title,
-      description: contractMarket.description,
-      category: Number(contractMarket.category),
-      optionA: contractMarket.optionA,
-      optionB: contractMarket.optionB,
-      creator: contractMarket.creator,
-      createdAt: contractMarket.createdAt.toString(),
-      endTime: contractMarket.endTime.toString(),
-      minBet: formatEther(contractMarket.minBet),
-      maxBet: formatEther(contractMarket.maxBet),
-      status: Number(contractMarket.status),
-      outcome: contractMarket.resolved ? Number(contractMarket.outcome) : null,
-      resolved: contractMarket.resolved,
-      totalOptionAShares: formatEther(contractMarket.totalOptionAShares),
-      totalOptionBShares: formatEther(contractMarket.totalOptionBShares),
-      totalPool: formatEther(contractMarket.totalPool),
-      imageURI: contractMarket.imageUrl,
-    };
-  };
-
-  // Get single market
-  const getMarket = (marketId: string) => {
-    const { data: marketData, isLoading, refetch } = useReadContract({
-      address: PREDICTION_MARKET_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: 'getMarket',
-      args: [BigInt(marketId)],
-    });
-
-    return {
-      market: marketData ? transformContractMarket(marketData) : null,
-      isLoading,
-      refetch,
-    };
-  };
-
-  // Get user position
-  const getUserPosition = (userAddress: string, marketId: string) => {
-    const { data: positionData, isLoading, refetch } = useReadContract({
-      address: PREDICTION_MARKET_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: 'getUserPosition',
-      args: [userAddress as `0x${string}`, BigInt(marketId)],
-    });
-
-    return {
-      position: positionData ? {
-        optionAShares: formatEther(positionData.optionAShares),
-        optionBShares: formatEther(positionData.optionBShares),
-        totalInvested: formatEther(positionData.totalInvested),
-        marketId: Number(marketId),
-        currentValue: '0', // Calculate based on current market state
-        profitLoss: '0', // Calculate based on current market state
-      } : null,
-      isLoading,
-      refetch,
-    };
-  };
-
+  // Use universal contract read hook
+  const universalRead = useUniversalContractRead();
+  
   return {
-    allMarkets: allMarkets ? (allMarkets as any[]).map(transformContractMarket) : [],
-    activeMarkets: activeMarkets ? (activeMarkets as any[]).map(transformContractMarket) : [],
-    allMarketsLoading,
-    activeMarketsLoading,
-    refetchAllMarkets,
-    refetchActiveMarkets,
-    getMarket,
-    getUserPosition,
+    allMarkets: universalRead.allMarkets,
+    activeMarkets: universalRead.activeMarkets,
+    allMarketsLoading: universalRead.allMarketsLoading,
+    activeMarketsLoading: universalRead.activeMarketsLoading,
+    refetchAllMarkets: universalRead.refetchAllMarkets,
+    refetchActiveMarkets: universalRead.refetchActiveMarkets,
+    getMarket: universalRead.getMarket,
+    getUserPosition: universalRead.getUserPosition,
   };
 };

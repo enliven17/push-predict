@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { PushChain } from '@pushchain/core';
 import { ethers } from 'ethers';
-import { useAccount, useWalletClient } from 'wagmi';
+import { usePushWalletContext, usePushChainClient } from '@pushchain/ui-kit';
 import { toast } from 'sonner';
 
 export interface UniversalBetParams {
@@ -13,49 +13,37 @@ export interface UniversalBetParams {
 export const usePushUniversal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [universalSigner, setUniversalSigner] = useState<any>(null);
-  const [pushClient, setPushClient] = useState<any>(null);
   
-  const { address, chainId } = useAccount();
-  const { data: walletClient } = useWalletClient();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  
+  const address = pushChainClient?.universal?.account;
+  const chainId = 42101; // Push Testnet
 
   // Initialize Universal Signer when wallet changes
   useEffect(() => {
     const initializeUniversal = async () => {
-      if (!walletClient || !address) {
+      if (!pushChainClient || !address) {
         setUniversalSigner(null);
-        setPushClient(null);
         return;
       }
 
       try {
         console.log('🔄 Initializing Universal Signer...');
         
-        // Convert wallet client to ethers signer
-        const provider = new ethers.BrowserProvider(walletClient.transport);
-        const ethersSigner = await provider.getSigner();
-        
-        // Create Universal Signer with Push Chain SDK
-        const universal = await PushChain.utils.signer.toUniversal(ethersSigner);
-        setUniversalSigner(universal);
-        
-        // Initialize Push Chain client
-        const client = await PushChain.initialize({
-          signer: universal,
-          env: 'testnet'
-        });
-        setPushClient(client);
+        // Push UI Kit already provides the universal signer
+        setUniversalSigner(pushChainClient.universal);
         
         console.log('✅ Universal Signer initialized for chain:', chainId);
         
       } catch (error: any) {
         console.error('❌ Failed to initialize Universal Signer:', error);
         setUniversalSigner(null);
-        setPushClient(null);
       }
     };
 
     initializeUniversal();
-  }, [walletClient, address, chainId]);
+  }, [pushChainClient, address, chainId]);
 
   // Place universal bet
   const placeUniversalBet = async (params: UniversalBetParams) => {
@@ -79,10 +67,8 @@ Address: ${address}
 Nonce: ${nonce}
 Timestamp: ${Date.now()}`;
 
-      // Sign message with current chain's signer
-      const provider = new ethers.BrowserProvider(walletClient!.transport);
-      const signer = await provider.getSigner();
-      const signature = await signer.signMessage(message);
+      // Sign message with Push Chain client
+      const signature = await pushChainClient!.universal.signMessage(message);
 
       console.log('✅ Universal signature generated');
 
@@ -112,31 +98,8 @@ Timestamp: ${Date.now()}`;
       console.log('Origin Chain:', `eip155:${chainId}`);
       console.log('Target Chain: Push Network (eip155:42101)');
 
-      // Use Push Chain client or fallback to direct transaction
-      let txResponse;
-      
-      if (pushClient && pushClient.tx && pushClient.tx.send) {
-        // Use Push Chain client
-        txResponse = await pushClient.tx.send(universalTx);
-      } else {
-        // Fallback: Send directly to Push Network
-        const pushProvider = new ethers.JsonRpcProvider('https://evm.rpc-testnet-donut-node1.push.org/');
-        const pushWallet = new ethers.Wallet(process.env.PRIVATE_KEY!, pushProvider);
-        const pushContract = new ethers.Contract(
-          contractAddress,
-          ["function placeCrossChainBet(uint256 marketId, uint8 option, string originChain, address originAddress, bytes signature) payable"],
-          pushWallet
-        );
-        
-        txResponse = await pushContract.placeCrossChainBet(
-          marketId,
-          option,
-          `eip155:${chainId}`,
-          address,
-          signature,
-          { value: ethers.parseEther(amount), gasLimit: 500000 }
-        );
-      }
+      // Use Push Chain client to send transaction
+      const txResponse = await pushChainClient!.universal.sendTransaction(universalTx);
 
       console.log('✅ Universal bet transaction sent:', txResponse.hash);
       
@@ -177,10 +140,10 @@ Timestamp: ${Date.now()}`;
   return {
     isLoading,
     universalSigner,
-    pushClient,
+    pushClient: pushChainClient,
     placeUniversalBet,
     chainInfo: getChainInfo(),
-    isUniversalReady: !!universalSigner,
+    isUniversalReady: !!universalSigner && !!pushChainClient,
     connectedChain: chainId
   };
 };

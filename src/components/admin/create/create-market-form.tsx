@@ -3,7 +3,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { usePushWalletContext, usePushChainClient, PushUI } from "@pushchain/ui-kit";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,7 +65,10 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
 export function CreateMarketForm({ onSubmit, isLoading: externalLoading = false }: CreateMarketFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { address, isConnected } = useAccount();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  const address = pushChainClient?.universal?.account;
+  const isConnected = connectionStatus === PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED;
 
   const [formData, setFormData] = useState({
     question: "",

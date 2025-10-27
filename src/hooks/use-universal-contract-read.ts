@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { useChainId } from 'wagmi';
+import { usePushWalletContext, usePushChainClient } from '@pushchain/ui-kit';
 import { PREDICTION_MARKET_ABI, PREDICTION_MARKET_ADDRESS } from '@/lib/contracts/prediction-market';
 import { Market } from '@/types/market';
-import { formatEther } from 'viem';
+const formatEther = (value: bigint) => ethers.formatEther(value);
 
 // Always read from Push Network regardless of connected chain
 const PUSH_PROVIDER = new ethers.JsonRpcProvider(
@@ -22,21 +22,11 @@ export const useUniversalContractRead = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const chainId = useChainId();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
   
-  // Get chain info from chainId
-  const getChainInfo = (id: number) => {
-    switch (id) {
-      case 42101:
-        return { id: 42101, name: 'Push Network Donut Testnet' };
-      case 11155111:
-        return { id: 11155111, name: 'Ethereum Sepolia' };
-      default:
-        return { id, name: 'Unknown Network' };
-    }
-  };
-  
-  const chain = getChainInfo(chainId);
+  const chainId = 42101; // Always use Push Network
+  const chain = { id: 42101, name: 'Push Network Donut Testnet' };
 
   // Transform contract data to Market type
   const transformContractMarket = (contractMarket: any): Market => {

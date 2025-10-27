@@ -9,8 +9,7 @@ import { usePredictionContract, usePredictionContractRead } from '@/hooks/use-pr
 import { useUniversalTransactions } from '@/hooks/use-universal-transactions';
 import { useETHBridge } from '@/hooks/use-eth-bridge';
 import { useBetActivity } from '@/hooks/use-bet-activity';
-import { useAccount, useBalance, useChainId, useWalletClient } from 'wagmi';
-import { useWaitForTransactionReceipt } from 'wagmi';
+import { usePushWalletContext, usePushChainClient } from '@pushchain/ui-kit';
 import { parseEther, formatEther } from 'viem';
 import { ethers } from 'ethers';
 import { toast } from 'sonner';
@@ -52,10 +51,12 @@ export const BetDialog: React.FC<BetDialogProps> = ({
     chainUsed: 'push' | 'ethereum' | 'solana';
   } | null>(null);
 
-  const { address } = useAccount();
-  const chainId = useChainId();
-  const { data: walletClient } = useWalletClient();
-  const { data: balance } = useBalance({ address });
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  
+  const address = pushChainClient?.universal?.account;
+  const chainId = 42101; // Push Testnet chain ID
+  const balance = undefined; // Balance will be fetched separately if needed
   
   const { placeBet, isLoading } = usePredictionContract();
   const { market } = usePredictionContractRead().getMarket(marketId);
@@ -76,8 +77,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
 
   // Validation
   const isValidAmount = betAmount && parseFloat(betAmount) > 0 && !isNaN(parseFloat(betAmount));
-  const hasInsufficientBalance = balance && isValidAmount && 
-    parseFloat(formatEther(balance.value)) < parseFloat(betAmount);
+  const hasInsufficientBalance = false; // TODO: Implement balance check with Push Chain client
   
   // Market-specific validation
   const marketValidation = market ? {
@@ -140,7 +140,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
         isPushNetwork
       });
 
-      let result;
+      let result: any;
       
       if (isPushNetwork) {
         // Native Push Network transaction
@@ -191,8 +191,8 @@ export const BetDialog: React.FC<BetDialogProps> = ({
         }
       } else {
         // Cross-chain transaction with ETH bridge
-        if (!walletClient) {
-          toast.error('Wallet client not available');
+        if (!pushChainClient) {
+          toast.error('Push Chain client not available');
           return;
         }
 
@@ -219,15 +219,12 @@ export const BetDialog: React.FC<BetDialogProps> = ({
           setBridgeStep('signing');
           toast.info('Step 2/2: Please sign the bet transaction...');
 
-          const provider = new ethers.BrowserProvider(walletClient.transport);
-          const signer = await provider.getSigner();
-
-          result = await placeUniversalBet(signer, {
+          result = await placeUniversalBet({
             marketId,
             option: optionIndex,
             amount: betAmount,
             originChain: `eip155:${chainId}`,
-            originAddress: address,
+            originAddress: address || '',
             bridgeId
           });
 
@@ -412,7 +409,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                       !betValidation.isValid ? 'border-red-500/50 focus:border-red-500' : ''
                     }`}
                     disabled={isSubmitting || isLoading}
-                    noValidate
+
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-400">
                     PC
@@ -445,7 +442,7 @@ export const BetDialog: React.FC<BetDialogProps> = ({
                 {/* Balance Info */}
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>{isPushNetwork ? 'Available Balance:' : `${chainInfo.currency} Balance:`}</span>
-                  <span>{formatBalance(balance?.value)} {chainInfo.currency}</span>
+                  <span>-- {chainInfo.currency}</span>
                 </div>
                 {!isPushNetwork && (
                   <div className="text-xs text-gray-500 text-center">

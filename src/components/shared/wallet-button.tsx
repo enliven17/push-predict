@@ -3,29 +3,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
-  Wallet,
-  Copy,
-  ExternalLink,
-  LogOut,
-  User,
-  ChevronDown,
-  RefreshCw,
   Menu,
   Home,
   TrendingUp,
@@ -34,13 +18,16 @@ import {
   BookOpen,
   FileText,
   Shield,
+  User,
 } from "lucide-react";
 import Link from "next/link";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
+import { PushUniversalAccountButton, usePushWalletContext, usePushChainClient, PushUI } from "@pushchain/ui-kit";
 
 export function WalletButton() {
-  const { address, isConnected } = useAccount();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  const isConnected = connectionStatus === PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED;
+  const address = pushChainClient?.universal?.account;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleMobileNavLinkClick = () => {
@@ -80,7 +67,7 @@ export function WalletButton() {
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto space-y-6 mt-4 pr-2">
               <div className="bg-[#2a2d3a] rounded-lg p-4">
-                <ConnectButton accountStatus={{ smallScreen: "avatar", largeScreen: "full" }} chainStatus="none" />
+                <PushUniversalAccountButton connectButtonText="Connect Wallet" />
               </div>
 
               {/* Navigation Links */}
@@ -180,9 +167,9 @@ export function WalletButton() {
               </div>
             </div>
 
-            {/* Fixed Footer - Logout Button */}
+            {/* Fixed Footer - Wallet Button */}
             <div className="flex-shrink-0 pt-4 mt-4 border-t border-[#2a2d3a]">
-              <ConnectButton />
+              <PushUniversalAccountButton connectButtonText="Connect Wallet" />
             </div>
           </SheetContent>
         </Sheet>
@@ -190,10 +177,10 @@ export function WalletButton() {
 
       {/* Desktop Wallet Button - Hidden on mobile */}
       <div className="hidden lg:block">
-        <ConnectButton showBalance={{ smallScreen: true, largeScreen: true }} chainStatus="icon" />
+        <PushUniversalAccountButton connectButtonText="Connect Wallet" />
       </div>
       <div className="lg:hidden">
-        <ConnectButton accountStatus={{ smallScreen: "avatar", largeScreen: "full" }} chainStatus="none" />
+        <PushUniversalAccountButton connectButtonText="Connect" />
       </div>
     </div>
   );

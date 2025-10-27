@@ -50,14 +50,24 @@ export const useUniversalTransactions = () => {
 
   // Place universal bet
   const placeUniversalBet = async (
-    signer: ethers.Signer,
     params: UniversalBetParams
   ) => {
     try {
       setIsLoading(true);
 
-      // Generate signature
-      const { message, signature, nonce } = await generateUniversalSignature(signer, params);
+      // Generate signature using Push Chain client
+      const nonce = Date.now().toString();
+      const message = UniversalSignatureVerifier.generateUniversalMessage(
+        'PLACE_BET',
+        params.marketId,
+        params.option,
+        params.amount,
+        nonce
+      );
+      
+      // For now, we'll use a placeholder signature
+      // In a real implementation, this would use Push Chain client to sign
+      const signature = `placeholder_signature_${nonce}`;
 
       // Call universal bet API
       const response = await fetch('/api/universal/place-bet', {

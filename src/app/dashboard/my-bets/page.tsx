@@ -1,14 +1,17 @@
 "use client";
 
 import { MyBets } from "@/components/market/my-bets";
-import { useAccount } from "wagmi";
+import { usePushWalletContext, usePushChainClient, PushUI } from "@pushchain/ui-kit";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Wallet } from "lucide-react";
 import Link from "next/link";
 
 export default function MyBetsPage() {
-  const { address, isConnected } = useAccount();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  const address = pushChainClient?.universal?.account;
+  const isConnected = connectionStatus === PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED;
 
   if (!isConnected || !address) {
     return (

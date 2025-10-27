@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePredictionContractRead, usePredictionContract } from "@/hooks/use-prediction-contract";
 import { useUniversalContractRead } from "@/hooks/use-universal-contract-read";
 import { OwnerOnly } from "@/components/auth/owner-only";
-import { useAccount } from "wagmi";
+import { usePushWalletContext, usePushChainClient } from "@pushchain/ui-kit";
 import { MarketStatus } from "@/types/market";
 import {
   Bookmark,
@@ -40,7 +40,9 @@ import { useEffect, useState } from "react";
 export default function MarketDetailPage() {
   const params = useParams();
   const marketId = params.id as string;
-  const { address } = useAccount();
+  const { connectionStatus } = usePushWalletContext();
+  const { pushChainClient } = usePushChainClient();
+  const address = pushChainClient?.universal?.account;
 
   // Use universal contract hooks for cross-chain compatibility
   const { getMarket, getUserPosition, isPushNetwork } = useUniversalContractRead();

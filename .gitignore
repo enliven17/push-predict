@@ -9,7 +9,7 @@ artifacts
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+docsp
 # testing
 /coverage
 

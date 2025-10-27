@@ -1,45 +1,46 @@
 ﻿"use client";
-import "@rainbow-me/rainbowkit/styles.css";
 import React from "react";
-import { WagmiProvider, http } from "wagmi";
+import { PushUniversalWalletProvider, PushUI } from "@pushchain/ui-kit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider, getDefaultConfig, darkTheme } from "@rainbow-me/rainbowkit";
-import { pushTestnet } from "@/config/push";
-import { sepolia } from "wagmi/chains";
 
+// Create a client
 const queryClient = new QueryClient();
 
-// Add safety check for pushTestnet
-if (!pushTestnet) {
-  console.error("pushTestnet is undefined");
-  throw new Error("pushTestnet configuration is missing");
-}
+// App metadata for Push UI Kit
+const appMetadata = {
+  logoUrl: "/logo.png",
+  title: "PushPredict",
+  description: "Decentralized Prediction Markets on Push Chain",
+};
 
-console.log("pushTestnet config:", pushTestnet);
-
-const wagmiConfig = getDefaultConfig({
-  appName: "PushPredict",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo",
-  chains: [pushTestnet as any, sepolia], // Add Ethereum Sepolia support
-  transports: {
-    [pushTestnet.id]: http(pushTestnet.rpcUrls.default.http[0]),
-    [sepolia.id]: http("https://gateway.tenderly.co/public/sepolia"),
+// Wallet configuration
+const walletConfig = {
+  network: PushUI.CONSTANTS.PUSH_NETWORK.TESTNET,
+  login: {
+    email: true,
+    google: true,
+    wallet: {
+      enabled: true,
+    },
+    appPreview: true,
   },
-  ssr: true,
-}) as any;
+  modal: {
+    loginLayout: PushUI.CONSTANTS.LOGIN.LAYOUT.SPLIT,
+    connectedLayout: PushUI.CONSTANTS.CONNECTED.LAYOUT.HOVER,
+    appPreview: true,
+  },
+};
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={darkTheme({ 
-          accentColor: "#e91e63", // Push pembe rengi
-          accentColorForeground: "white",
-          borderRadius: "medium",
-        })}>
-          {children}
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <QueryClientProvider client={queryClient}>
+      <PushUniversalWalletProvider 
+        config={walletConfig} 
+        app={appMetadata}
+        themeMode="dark"
+      >
+        {children}
+      </PushUniversalWalletProvider>
+    </QueryClientProvider>
   );
 }
