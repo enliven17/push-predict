@@ -1,118 +1,127 @@
 # PushPredict Architecture Diagrams
 
-This document contains Mermaid diagrams that visualize the architecture and flows of the PushPredict universal cross-chain prediction market platform.
+This document contains Mermaid diagrams that visualize the architecture and flows of the PushPredict universal cross-chain prediction market platform with Push UI Kit integration.
 
-## 1. System Architecture Overview
+## 1. System Architecture Overview (Updated with Push UI Kit)
 
 ```mermaid
 graph TB
     subgraph "Frontend (Next.js)"
         UI[User Interface]
-        WC[Wallet Connectors]
+        PUK[Push UI Kit]
+        PWP[PushUniversalWalletProvider]
+        PUB[PushUniversalAccountButton]
         UH[Universal Hooks]
+    end
+    
+    subgraph "Push UI Kit Components"
+        PWC[usePushWalletContext]
+        PCC[usePushChainClient]
+        PUC[Push Universal Client]
     end
     
     subgraph "Backend APIs"
         API[Next.js API Routes]
         SB[Supabase Database]
+        QC[QueryClient Provider]
     end
     
     subgraph "Push Network"
         PC[PredictionMarket Contract]
         PN[Push Network Donut Testnet]
+        PCS[Push Chain SDK]
     end
     
-    subgraph "Ethereum Sepolia"
+    subgraph "Cross-Chain Support"
         EB[ETH Bridge Contract]
         ES[Ethereum Sepolia Network]
-    end
-    
-    subgraph "Solana Devnet"
         SD[Solana Devnet]
-        SW[Solana Wallet]
     end
     
-    UI --> WC
-    WC --> UH
+    UI --> PUK
+    PUK --> PWP
+    PWP --> PUB
+    PWP --> PWC
+    PWC --> PCC
+    PCC --> PUC
+    PUC --> PCS
+    
+    UH --> PWC
+    UH --> PCC
     UH --> API
+    API --> QC
     API --> SB
-    API --> PC
+    
+    PCS --> PC
     PC --> PN
     
     UH --> EB
     EB --> ES
-    
     UH --> SD
-    SD --> SW
     
     PC --> SB
-    EB --> PC
 ```
 
-## 2. Universal Cross-Chain Betting Flow
+## 2. Push UI Kit Wallet Connection Flow
 
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant F as Frontend
-    participant W as Wallet
-    participant B as ETH Bridge
-    participant P as Push Contract
-    participant S as Supabase
+    participant PUB as PushUniversalAccountButton
+    participant PWP as PushUniversalWalletProvider
+    participant PCC as usePushChainClient
+    participant PCS as Push Chain SDK
+    participant PN as Push Network
     
-    U->>F: Select market & bet option
-    F->>U: Show universal bet dialog
-    U->>F: Choose chain (ETH/SOL/Push)
+    U->>PUB: Click Connect Wallet
+    PUB->>PWP: Trigger connection modal
+    PWP->>U: Show wallet options (Email, Google, Wallet)
+    U->>PWP: Select connection method
     
-    alt Ethereum Sepolia
-        F->>W: Connect to Ethereum
-        U->>W: Approve ETH payment
-        W->>B: Send ETH to bridge
-        B->>P: Bridge ETH to PC tokens
-        P->>P: Execute bet with PC
-    else Solana Devnet
-        F->>W: Connect to Solana
-        U->>W: Sign cross-chain message
-        F->>P: Submit signature to Push
-        P->>P: Verify & execute sponsored bet
-    else Push Network
-        F->>W: Connect to Push
-        U->>W: Direct PC token payment
-        W->>P: Execute bet directly
+    alt Email/Google Login
+        PWP->>PCS: Create universal account
+        PCS->>PN: Initialize Push account
+        PN->>PCS: Return account details
+    else External Wallet
+        PWP->>PCS: Connect external wallet
+        PCS->>PN: Create universal signer
+        PN->>PCS: Return signer details
     end
     
-    P->>S: Sync bet activity
-    S->>F: Update UI with new bet
-    F->>U: Show success confirmation
+    PCS->>PCC: Initialize Push Chain client
+    PCC->>PWP: Update connection status
+    PWP->>PUB: Update button state
+    PUB->>U: Show connected state
 ```
 
-## 3. ETH Bridge Architecture
+## 3. Push UI Kit Transaction Flow
 
 ```mermaid
-graph LR
-    subgraph "Ethereum Sepolia"
-        U[User Wallet]
-        EB[ETH Bridge Contract]
-        ETH[ETH Payment]
-    end
+sequenceDiagram
+    participant U as User
+    participant BD as BetDialog
+    participant PWC as usePushWalletContext
+    participant PCC as usePushChainClient
+    participant PCS as Push Chain SDK
+    participant PC as Push Contract
+    participant SB as Supabase
     
-    subgraph "Push Network"
-        US[Universal Signer]
-        PC[PredictionMarket Contract]
-        PCT[PC Tokens]
-    end
+    U->>BD: Place bet
+    BD->>PWC: Check connection status
+    PWC->>BD: Return CONNECTED status
+    BD->>PCC: Get Push Chain client
+    PCC->>BD: Return client instance
     
-    subgraph "Backend"
-        API[Bridge API]
-        DB[Database]
-    end
+    BD->>PCS: Prepare transaction
+    PCS->>U: Request transaction approval
+    U->>PCS: Approve transaction
+    PCS->>PC: Send transaction to contract
+    PC->>PCS: Return transaction hash
     
-    U -->|1. Pay ETH| EB
-    EB -->|2. Emit Event| API
-    API -->|3. Verify Payment| DB
-    API -->|4. Trigger Bridge| US
-    US -->|5. Send PC Tokens| PC
-    PC -->|6. Execute Bet| PCT
+    PCS->>BD: Transaction confirmed
+    BD->>SB: Record bet activity
+    SB->>BD: Confirm storage
+    BD->>U: Show success modal
 ```
 
 ## 4. Database Schema Relationships
@@ -166,31 +175,40 @@ erDiagram
     BET_ACTIVITIES }o--|| BRIDGE_TRANSACTIONS : "may have"
 ```
 
-## 5. Universal Wallet Connection Flow
+## 5. Push UI Kit Universal Connection Flow
 
 ```mermaid
 flowchart TD
-    A[User Clicks Connect] --> B{Detect Available Wallets}
+    A[User Clicks PushUniversalAccountButton] --> B[Push UI Kit Modal Opens]
     
-    B --> C[MetaMask/Rainbow - Ethereum]
-    B --> D[Phantom/Solflare - Solana]
-    B --> E[Push Wallet - Push Network]
+    B --> C{Login Method Selection}
     
-    C --> F[Connect to Ethereum Sepolia]
-    D --> G[Connect to Solana Devnet]
-    E --> H[Connect to Push Network]
+    C --> D[Email Login]
+    C --> E[Google OAuth]
+    C --> F[External Wallet]
     
-    F --> I[Check ETH Balance]
-    G --> J[Check SOL Balance]
-    H --> K[Check PC Balance]
+    D --> G[Email Verification]
+    E --> H[Google Authentication]
+    F --> I{Wallet Type Detection}
     
-    I --> L[Enable ETH Bridge Betting]
-    J --> M[Enable Cross-Chain Signing]
-    K --> N[Enable Direct PC Betting]
+    I --> J[MetaMask/Ethereum]
+    I --> K[Phantom/Solana]
+    I --> L[Other Web3 Wallets]
     
-    L --> O[Universal Interface Ready]
-    M --> O
-    N --> O
+    G --> M[Create Push Universal Account]
+    H --> M
+    J --> N[Connect External Wallet]
+    K --> N
+    L --> N
+    
+    M --> O[Initialize Push Chain Client]
+    N --> P[Create Universal Signer]
+    
+    O --> Q[usePushChainClient Ready]
+    P --> Q
+    
+    Q --> R[Update usePushWalletContext]
+    R --> S[Enable Betting Interface]
 ```
 
 ## 6. Market Resolution Process
@@ -246,44 +264,59 @@ graph TD
     M --> O[Show Error Message]
 ```
 
-## 8. Universal Hook System Architecture
+## 8. Push UI Kit Hook System Architecture
 
 ```mermaid
 graph TB
-    subgraph "Universal Hooks Layer"
+    subgraph "Push UI Kit Hooks"
+        PWC[usePushWalletContext]
+        PCC[usePushChainClient]
+        PUC[Push Universal Client]
+    end
+    
+    subgraph "Application Hooks"
         UCR[useUniversalContractRead]
         UT[useUniversalTransactions]
         UEB[useEthBridge]
-        UP[usePushUniversal]
+        UPC[usePredictionContract]
+        UCO[useContractOwner]
     end
     
-    subgraph "Chain-Specific Hooks"
-        PC[usePredictionContract]
-        WH[Wagmi Hooks]
-        SH[Solana Hooks]
+    subgraph "Push Chain SDK"
+        PCS[Push Chain SDK]
+        US[Universal Signer]
+        ST[Send Transaction]
+        SM[Sign Message]
     end
     
-    subgraph "Transaction Handler"
-        TH[TransactionHandler]
-        SV[SignatureVerifier]
+    subgraph "Legacy Support (Removed)"
+        WH[Wagmi Hooks - REMOVED]
+        RK[RainbowKit - REMOVED]
+        VM[Viem - REMOVED]
     end
     
-    subgraph "Network Detection"
-        ND[Network Detection]
-        CS[Chain Switching]
-    end
+    PWC --> PCC
+    PCC --> PUC
+    PUC --> PCS
     
-    UCR --> PC
-    UCR --> WH
-    UT --> TH
-    UEB --> WH
-    UP --> SH
+    UCR --> PWC
+    UCR --> PCC
+    UT --> PWC
+    UT --> PCC
+    UEB --> PWC
+    UEB --> PCC
+    UPC --> PWC
+    UPC --> PCC
+    UCO --> PWC
+    UCO --> PCC
     
-    TH --> SV
-    TH --> ND
-    ND --> CS
+    PCS --> US
+    PCS --> ST
+    PCS --> SM
     
-    PC --> WH
+    style WH fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
+    style RK fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
+    style VM fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
 ```
 
 ## 9. Real-Time Data Synchronization
@@ -418,6 +451,52 @@ sequenceDiagram
     PC->>U: Show live price for market asset
 ```
 
+## 13. Push UI Kit Integration Summary
+
+```mermaid
+graph TB
+    subgraph "Before: Wagmi + RainbowKit"
+        OWP[Web3Provider with Wagmi]
+        ORK[RainbowKit ConnectButton]
+        OWH[Wagmi Hooks]
+        OV[Viem for transactions]
+    end
+    
+    subgraph "After: Push UI Kit"
+        NWP[Web3Provider with Push UI Kit]
+        NPB[PushUniversalAccountButton]
+        NPH[Push UI Kit Hooks]
+        NPS[Push Chain SDK]
+    end
+    
+    subgraph "Migration Benefits"
+        UE[Universal Experience]
+        SM[Simplified Management]
+        NW[Native Push Network]
+        CC[Cross-Chain Ready]
+    end
+    
+    OWP -.->|Replaced by| NWP
+    ORK -.->|Replaced by| NPB
+    OWH -.->|Replaced by| NPH
+    OV -.->|Replaced by| NPS
+    
+    NWP --> UE
+    NPB --> SM
+    NPH --> NW
+    NPS --> CC
+    
+    style OWP fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
+    style ORK fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
+    style OWH fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
+    style OV fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
+    
+    style NWP fill:#ccffcc,stroke:#00ff00
+    style NPB fill:#ccffcc,stroke:#00ff00
+    style NPH fill:#ccffcc,stroke:#00ff00
+    style NPS fill:#ccffcc,stroke:#00ff00
+```
+
 ---
 
-*These diagrams provide a comprehensive overview of the PushPredict universal cross-chain prediction market architecture, including Pyth Network integration for real-time price feeds, showing how different components interact to enable seamless betting across Ethereum Sepolia, Solana Devnet, and Push Network.*
+*These diagrams provide a comprehensive overview of the PushPredict universal cross-chain prediction market architecture, now fully integrated with Push UI Kit for seamless wallet management and native Push Network support. The migration from Wagmi/RainbowKit to Push UI Kit enables better user experience with universal account creation, cross-chain compatibility, and simplified wallet management.*

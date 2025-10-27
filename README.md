@@ -1,34 +1,34 @@
 ﻿# PushPredict 🌐
 
-The world's first **Universal Cross-Chain Prediction Market** platform powered by Push Network's revolutionary technology. Trade on real-world events from any supported blockchain with seamless cross-chain interactions.
+The world's first **Universal Cross-Chain Prediction Market** platform powered by Push Network's revolutionary technology and Push UI Kit. Trade on real-world events with seamless universal wallet integration and cross-chain interactions.
 
 ## 🌟 Universal Features
 
-- **🌐 Universal Cross-Chain** - Bet from Ethereum, Solana, or Push Network
-- **🔄 Real Cross-Chain Bridge** - Pay ETH, bet with PC tokens automatically
-- **⚡ Universal Signer** - Sign once, execute anywhere with Push Network SDK
-- **🎯 Binary Prediction Markets** - Trade on Yes/No outcomes across chains
+- **🌐 Push Universal Wallet** - Seamless multi-chain wallet integration with Push UI Kit
+- **🔄 Universal Authentication** - Email, Google, and Web3 wallet login options
+- **⚡ Push Chain Client** - Direct integration with Push Network's universal blockchain
+- **🎯 Binary Prediction Markets** - Trade on Yes/No outcomes with PC tokens
 - **📊 Live Price Feeds** - Real-time crypto prices powered by Pyth Network
-- **📈 Real-time Activity** - Live cross-chain bet tracking and updates
-- **👤 Universal Dashboard** - Complete multi-chain betting history
+- **📈 Real-time Activity** - Live betting tracking and market updates
+- **👤 Universal Dashboard** - Complete betting history and portfolio management
 - **💬 Comments System** - Market discussions and community engagement
-- **🔧 Admin Controls** - Universal market creation and resolution
+- **🔧 Admin Controls** - Market creation and resolution tools
 - **📱 Responsive Design** - Mobile-first UI with Push Network theme
 
 ## 🚀 Universal Tech Stack
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Universal Blockchain**: Push Network Donut Testnet (Primary)
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Universal Blockchain**: Push Network Donut Testnet
+- **Wallet Integration**: Push UI Kit (@pushchain/ui-kit)
+- **Universal SDK**: @pushchain/core for blockchain interactions
 - **Price Feeds**: Pyth Network (Real-time crypto prices)
-- **Cross-Chain Support**: Ethereum Sepolia, Solana Devnet
-- **Universal SDK**: @pushchain/core for cross-chain interactions
-- **Smart Contracts**: Solidity with Universal Cross-Chain features
-- **Wallet**: RainbowKit + wagmi (Multi-chain compatibility)
-- **Database**: Supabase (PostgreSQL) with cross-chain schema
-- **State Management**: Zustand with universal state
+- **Smart Contracts**: Solidity with Push Network integration
+- **Database**: Supabase (PostgreSQL) with universal schema
+- **State Management**: Zustand with Push Wallet Context
 - **UI Components**: Radix UI, Lucide Icons with Push Network theme
+- **Authentication**: Push Universal Wallet (Email, Google, Web3)
 
-## 🔗 Universal Network Links
+## 🔗 Network Information
 
 ### 🍩 Push Network (Primary)
 - **Network**: Push Network Donut Testnet (Chain ID: 42101)
@@ -36,18 +36,7 @@ The world's first **Universal Cross-Chain Prediction Market** platform powered b
 - **RPC**: https://evm.rpc-testnet-donut-node1.push.org/
 - **Explorer**: https://donut.push.network
 - **Contract**: `0x0fA9052a598799d8ef7061bd74915E92532E5DE9`
-
-### ⟠ Ethereum Sepolia (Cross-Chain)
-- **Network**: Ethereum Sepolia Testnet (Chain ID: 11155111)
-- **Token**: ETH (Testnet Ether)
-- **Bridge**: ETH → PC automatic conversion
-- **Explorer**: https://sepolia.etherscan.io
-
-### ◎ Solana Devnet (Cross-Chain)
-- **Network**: Solana Devnet
-- **Token**: SOL (Testnet Solana)
-- **Bridge**: SOL → PC automatic conversion
-- **Explorer**: https://explorer.solana.com/?cluster=devnet
+- **Wallet Integration**: Push UI Kit with Universal Wallet
 
 ### 📊 Pyth Network (Price Feeds)
 - **Service**: Real-time price data provider
@@ -60,10 +49,9 @@ The world's first **Universal Cross-Chain Prediction Market** platform powered b
 
 ### Prerequisites
 - Node.js 18+ and npm
-- MetaMask or compatible Web3 wallet
+- Push Universal Wallet (Email, Google, or Web3 wallet)
 - **PC tokens** (Push Network) - Primary currency
-- **ETH** (Ethereum Sepolia) - For cross-chain betting
-- **SOL** (Solana Devnet) - For cross-chain betting
+- Push UI Kit integration for seamless wallet experience
 
 ### Installation
 
@@ -96,24 +84,19 @@ http://localhost:3000
 
 ### Environment Variables
 ```env
-# Push Network (Primary)
+# Push Network Configuration
 NEXT_PUBLIC_PUSH_RPC_URL=https://evm.rpc-testnet-donut-node1.push.org/
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x0fA9052a598799d8ef7061bd74915E92532E5DE9
 NEXT_PUBLIC_ADMIN_ADDRESS=<admin_wallet_address>
 NEXT_PUBLIC_PUSH_CHAIN_ID=42101
 
-# Universal Cross-Chain Bridge
-NEXT_PUBLIC_ETH_BRIDGE_ADDRESS=<bridge_address>
-NEXT_PUBLIC_UNIVERSAL_SIGNER_ADDRESS=<universal_signer_address>
+# Push UI Kit Configuration
+# No additional configuration needed - Push UI Kit handles wallet connections
 
 # Private Keys (Server-side)
 PRIVATE_KEY=<main_account_private_key>
-UNIVERSAL_SIGNER_PRIVATE_KEY=<universal_signer_private_key>
 
-# WalletConnect
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<your_project_id>
-
-# Supabase (Universal Database)
+# Supabase Database
 NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
 SUPABASE_SERVICE_ROLE_KEY=<service_role_key>
@@ -170,33 +153,29 @@ NEXT_PUBLIC_PUSH_RPC_URL=https://evm.rpc-testnet-donut-node1.push.org/
 NEXT_PUBLIC_PUSH_CHAIN_ID=42101
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+NEXT_PUBLIC_ADMIN_ADDRESS=your_admin_address
 
 # Private variables (server-side only)
 PRIVATE_KEY=your_private_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-UNIVERSAL_SIGNER_PRIVATE_KEY=your_universal_signer_private_key
 ```
 
-## 📱 Universal Usage
+## 📱 Usage Guide
 
-### 🌐 For Cross-Chain Users
-1. **Connect Any Wallet** - MetaMask, Phantom, or any Web3 wallet
-2. **Choose Your Chain** - Push Network, Ethereum Sepolia, or Solana Devnet
-3. **Browse Universal Markets** - Explore cross-chain prediction markets
-4. **Place Universal Bets** - 
-   - **Push Network**: Direct PC token betting
-   - **Ethereum Sepolia**: Pay ETH → Auto-bridge to PC
-   - **Solana Devnet**: Pay SOL → Auto-bridge to PC
-5. **Track Multi-Chain Performance** - View universal betting history
-6. **Claim Universal Winnings** - Collect rewards across all chains
-7. **Join Global Discussions** - Comment from any supported chain
+### 🌐 For Users
+1. **Connect with Push Universal Wallet** - Email, Google, or Web3 wallet options
+2. **Automatic Push Network Setup** - Seamless connection to Push Chain
+3. **Browse Prediction Markets** - Explore available betting opportunities
+4. **Place Bets with PC Tokens** - Direct betting on Push Network
+5. **Track Performance** - View complete betting history and portfolio
+6. **Claim Winnings** - Collect rewards from successful predictions
+7. **Join Discussions** - Comment and engage with the community
 
 ### 🔧 For Admins
-1. **Create Universal Markets** - Set up cross-chain prediction markets
-2. **Manage Multi-Chain Activity** - Monitor all supported networks
-3. **Resolve Universal Markets** - Determine outcomes for all participants
-4. **Track Universal Statistics** - Platform-wide cross-chain analytics
+1. **Create Markets** - Set up new prediction markets
+2. **Monitor Activity** - Track platform usage and statistics
+3. **Resolve Markets** - Determine outcomes and distribute winnings
+4. **Manage Platform** - Oversee all market operations
 
 ## 🏗️ Universal Smart Contract
 
@@ -207,34 +186,30 @@ UNIVERSAL_SIGNER_PRIVATE_KEY=your_universal_signer_private_key
 - **Min Bet**: 0.01 PC
 - **Max Bet**: 10 PC
 
-### Universal Cross-Chain Features
-- **✅ Cross-Chain Bet Placement** - `placeCrossChainBet()`
-- **✅ Universal Signature Verification** - Push Network SDK integration
-- **✅ Multi-Chain User Mapping** - Automatic address mapping
-- **✅ Universal Market Creation** - `createUniversalMarket()`
-- **✅ Cross-Chain Event Emission** - Universal activity tracking
+### Push Network Integration Features
+- **✅ Push UI Kit Integration** - Seamless wallet connection
+- **✅ Universal Authentication** - Multiple login methods
+- **✅ Push Chain Client** - Direct blockchain interaction
+- **✅ PC Token Betting** - Native Push Network currency
+- **✅ Real-time Updates** - Live market data and activity
 
 ### Available Scripts
 ```bash
-# Universal Contract Deployment
+# Contract Deployment
 npx hardhat run scripts/deploy.js --network push_testnet
 
-# Universal Market Management
+# Market Management
 node scripts/create-eth-market.js    # Create ETH prediction market
 node scripts/create-btc-market.js    # Create BTC prediction market
 node scripts/resolve-market.js       # Resolve market outcomes
 
-# Universal Cross-Chain Testing
-node scripts/test-push-universal.js     # Test Push Network universal features
-node scripts/test-real-universal-bet.js # Test real cross-chain betting
-node scripts/fund-universal-signer.js   # Fund universal signer
+# Push Network Testing
+node scripts/test-push-universal.js     # Test Push Network features
+node scripts/test-real-universal-bet.js # Test betting functionality
 
 # Database Management
 node scripts/sync-markets-to-supabase.js # Sync blockchain to database
 node scripts/check-bet-activities.js     # Check bet activity records
-
-# Universal Bridge Testing
-node scripts/check-universal-signer.js   # Check signer balance
 node scripts/check-markets.js            # Verify market data
 ```
 
